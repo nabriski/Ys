@@ -16,11 +16,9 @@ Ys("^/html$").get.html = function(req,res){
     return "<h1>Hello World!</h1>";
 }
 
-//return html response using template 'hello.html'
-/*
-Still thinking how to do this ...
+//return html response using template 'hello.html' (supports ejs templates for now)
 Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
     return {"name" : "Bob"};
 }
-*/
+
 Ys.run();

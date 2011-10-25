@@ -1,20 +1,37 @@
 var http = require('http');
 var url = require('url');
-//var fs = require('fs');
-//var ejs = require('ejs');
+var fs = require('fs');
+var ejs = require('ejs');
 //var querystring = require('querystring');
 
 var routes = []
 //--------------------------------------------------
-var make_route = function(){
-    return {"get":{},"post":{}};
+var Route = function(){
+    
+    this.get = new Template();
+    this.post = new Template();
+    return this;
+}
+//--------------------------------------------------
+var Template = function(){
+    return this;
+}
+//--------------------------------------------------
+Template.prototype.html = function(template_path){
+    //load template
+    var r = this;
+    fs.readFile(template_path, function (err, data) {
+          if (err) throw err;
+          r.compiled = ejs.compile(String(data));
+    }); 
+    return this;
 }
 //--------------------------------------------------
 var Ys = function(url) {
     
     var idx = routes.indexOf(url);
     if(idx===-1){
-        routes.push([url,make_route()]);
+        routes.push([url,new Route()]);
         idx = routes.length - 1;
     }
 
@@ -46,8 +63,12 @@ Ys.run = function(){
                 }
                 
                 if("html" in handler){
+
                     res.writeHead(200, {'Content-Type': 'text/html'});
-                    res.end(handler.html(req,res));
+                    if("args" in handler)//template
+                        res.end(handler.compiled(handler.args(req,res)));
+                    else
+                        res.end(handler.html(req,res));
                 }
 
                 return;
