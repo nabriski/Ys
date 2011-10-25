@@ -44,6 +44,12 @@ Ys.run = function(){
                     res.writeHead(200, {'Content-Type': 'application/json'});
                     res.end(JSON.stringify(handler.json(req,res)));
                 }
+                
+                if("html" in handler){
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                    res.end(handler.html(req,res));
+                }
+
                 return;
             }
 
