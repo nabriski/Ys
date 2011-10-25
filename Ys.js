@@ -2,18 +2,18 @@ var http = require('http');
 var url = require('url');
 //var fs = require('fs');
 //var ejs = require('ejs');
-var querystring = require('querystring');
+//var querystring = require('querystring');
 
 var routes = []
 //--------------------------------------------------
 var make_route = function(){
-    return {"get":null,"post":null};
+    return {"get":{},"post":{}};
 }
 //--------------------------------------------------
 var Ys = function(url) {
     
     var idx = routes.indexOf(url);
-    if(idx==-1){
+    if(idx===-1){
         routes.push([url,make_route()]);
         idx = routes.length - 1;
     }
@@ -37,7 +37,16 @@ Ys.run = function(){
                 handler(req,res);
                 return;
             }
-            
+
+            if(typeof(handler)==="object"){
+                
+                if("json" in handler){
+                    res.writeHead(200, {'Content-Type': 'application/json'});
+                    res.end(JSON.stringify(handler.json(req,res)));
+                }
+                return;
+            }
+
         }
 
     }).listen(8780, "127.0.0.1");
