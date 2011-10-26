@@ -8,7 +8,7 @@ Ys("^/$").get = function(req,res){
 
 //return json response
 Ys("^/json$").get.json = function(req,res){
-    return {"message" : "Hello World"};
+    res.writeObject({"message" : "Hello World"});
 }
 
 //return html response

@@ -39,6 +39,10 @@ var Ys = function(url) {
 
 }
 //--------------------------------------------------
+var jsonify = function(object){
+    this.end(JSON.stringify(object));
+}
+//--------------------------------------------------
 Ys.run = function(){
     
     http.createServer(function (req, res) {
@@ -59,7 +63,9 @@ Ys.run = function(){
                 
                 if("json" in handler){
                     res.writeHead(200, {'Content-Type': 'application/json'});
-                    res.end(JSON.stringify(handler.json(req,res)));
+                    res.writeObject = jsonify;
+                    handler.json(req,res);
+                    return;
                 }
                 
                 if("html" in handler){
