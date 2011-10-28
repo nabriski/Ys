@@ -84,7 +84,7 @@ Ys.run = function(){
                         handler.args(req,res);
                     }
                     else
-                        res.end(handler.html(req,res));
+                        handler.html(req,res);
                 }
 
                 return;

@@ -13,7 +13,7 @@ Ys("^/json$").get.json = function(req,res){
 
 //return html response
 Ys("^/html$").get.html = function(req,res){
-    return "<h1>Hello World!</h1>";
+    res.end("<h1>Hello World!</h1>");
 }
 
 //return html response using template 'hello.html' (supports ejs templates for now)
