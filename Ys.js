@@ -43,6 +43,14 @@ var jsonify = function(object){
     this.end(JSON.stringify(object));
 }
 //--------------------------------------------------
+var htmlify = function(compiled_template){
+
+    return function(object){
+        this.end(compiled_template(object));
+    }
+}
+//--------------------------------------------------
+
 Ys.run = function(){
     
     http.createServer(function (req, res) {
@@ -63,7 +71,7 @@ Ys.run = function(){
                 
                 if("json" in handler){
                     res.writeHead(200, {'Content-Type': 'application/json'});
-                    res.writeObject = jsonify;
+                    res.returnObject = jsonify;
                     handler.json(req,res);
                     return;
                 }
@@ -71,8 +79,10 @@ Ys.run = function(){
                 if("html" in handler){
 
                     res.writeHead(200, {'Content-Type': 'text/html'});
-                    if("args" in handler)//template
-                        res.end(handler.compiled(handler.args(req,res)));
+                    if("args" in handler){//template
+                        res.returnObject = htmlify(handler.compiled);
+                        handler.args(req,res);
+                    }
                     else
                         res.end(handler.html(req,res));
                 }

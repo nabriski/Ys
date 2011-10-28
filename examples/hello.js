@@ -8,7 +8,7 @@ Ys("^/$").get = function(req,res){
 
 //return json response
 Ys("^/json$").get.json = function(req,res){
-    res.writeObject({"message" : "Hello World"});
+    res.returnObject({"message" : "Hello World"});
 }
 
 //return html response
@@ -18,7 +18,7 @@ Ys("^/html$").get.html = function(req,res){
 
 //return html response using template 'hello.html' (supports ejs templates for now)
 Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
-    return {"name" : "Bob"};
+    res.returnObject({"name" : "Bob"});
 }
 
 Ys.run();
