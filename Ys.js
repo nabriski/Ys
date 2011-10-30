@@ -19,15 +19,25 @@ var Template = function(){
 //--------------------------------------------------
 Template.prototype.html = function(template_path){
     //load template
-    var r = this;
+    var t = this;
     fs.readFile(template_path, function (err, data) {
           if (err) throw err;
-          r.compiled = ejs.compile(String(data));
+          t.compiled = ejs.compile(String(data));
     }); 
     return this;
 }
 //--------------------------------------------------
-var Ys = function(url) {
+Template.prototype.static = function(){
+    
+    this.send_static = function(path,res){
+        fs.readFile("."+path, function (err, data) {
+              if (err) throw err;
+              res.end(String(data));
+        });
+    }
+}
+//--------------------------------------------------
+var Ys = exports.Ys = function(url) {
     
     var idx = routes.indexOf(url);
     if(idx===-1){
@@ -46,7 +56,9 @@ var jsonify = function(object){
 var htmlify = function(compiled_template){
 
     return function(object){
-        this.end(compiled_template(object));
+        if(typeof(object)==="undefined")
+            this.end(compiled_template(object));
+        return compiled_template(object);
     }
 }
 //--------------------------------------------------
@@ -68,7 +80,13 @@ Ys.run = function(){
             }
 
             if(typeof(handler)==="object"){
-                
+               
+                if("send_static" in handler){
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                    handler.send_static(path,res);
+                    return; 
+                }
+
                 if("json" in handler){
                     res.writeHead(200, {'Content-Type': 'application/json'});
                     res.returnObject = jsonify;
@@ -79,12 +97,12 @@ Ys.run = function(){
                 if("html" in handler){
 
                     res.writeHead(200, {'Content-Type': 'text/html'});
-                    if("args" in handler){//template
+                    if("args" in handler){//actual template
                         res.returnObject = htmlify(handler.compiled);
                         handler.args(req,res);
                     }
                     else
-                        handler.html(req,res);
+                        res.end(htmlify(handler.compiled)({}));
                 }
 
                 return;
@@ -96,4 +114,3 @@ Ys.run = function(){
     console.log('Server running at http://127.0.0.1:8780/');
 }
 //--------------------------------------------------
-exports.Ys = Ys;

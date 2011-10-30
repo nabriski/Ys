@@ -11,11 +11,6 @@ Ys("^/json$").get.json = function(req,res){
     res.returnObject({"message" : "Hello World"});
 }
 
-//return html response
-Ys("^/html$").get.html = function(req,res){
-    res.end("<h1>Hello World!</h1>");
-}
-
 //return html response using template 'hello.html' (supports ejs templates for now)
 Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
     res.returnObject({"name" : "Bob"});
