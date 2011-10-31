@@ -59,8 +59,10 @@ var jsonify = function(object){
 var htmlify = function(compiled_template){
 
     return function(object){
-        if(typeof(object)==="undefined")
+        if(typeof(object)==="undefined"){//no args object, just send the html
             this.end(compiled_template(object));
+            return;
+        }
         return compiled_template(object);
     }
 }
@@ -85,6 +87,7 @@ Ys.run = function(){
             if(typeof(handler)==="object"){
                
                 if("send_static" in handler){
+                    //MISSING - need to handle mime types
                     res.writeHead(200, {'Content-Type': 'text/html'});
                     handler.send_static(path,res);
                     return; 
@@ -105,7 +108,7 @@ Ys.run = function(){
                         handler.args(req,res);
                     }
                     else
-                        res.end(htmlify(handler.compiled)({}));
+                        res.end(htmlify(handler.compiled)());
                 }
 
                 return;
