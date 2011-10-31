@@ -8,16 +8,16 @@ var routes = []
 //--------------------------------------------------
 var Route = function(){
     
-    this.get = new Template();
-    this.post = new Template();
+    this.get = new Handler();
+    this.post = new Handler();
     return this;
 }
 //--------------------------------------------------
-var Template = function(){
+var Handler = function(){
     return this;
 }
 //--------------------------------------------------
-Template.prototype.html = function(template_path){
+Handler.prototype.html = function(template_path){
     //load template
     var t = this;
     fs.readFile(template_path, function (err, data) {
@@ -27,12 +27,15 @@ Template.prototype.html = function(template_path){
     return this;
 }
 //--------------------------------------------------
-Template.prototype.static = function(){
-    
+Handler.prototype.static = function(dir_path){
+   
+    if(typeof(dir_path)==="undefined")
+        dir_path = ".";
+
     this.send_static = function(path,res){
-        fs.readFile("."+path, function (err, data) {
+        fs.readFile(dir_path+path, function (err, data) {
               if (err) throw err;
-              res.end(String(data));
+              res.end(data);
         });
     }
 }
