@@ -2,8 +2,11 @@ var http = require('http');
 var url = require('url');
 var fs = require('fs');
 var ejs = require('ejs');
+var path = require('path');
+
 //var querystring = require('querystring');
 
+var mime_types = {}
 var routes = []
 //--------------------------------------------------
 var Route = function(){
@@ -27,13 +30,13 @@ Handler.prototype.html = function(template_path){
     return this;
 }
 //--------------------------------------------------
-Handler.prototype.static = function(dir_path){
+Handler.prototype.static = function(base_dir){
    
-    if(typeof(dir_path)==="undefined")
-        dir_path = ".";
+    if(typeof(base_dir)==="undefined")
+        base_dir = "";
 
-    this.send_static = function(path,res){
-        fs.readFile(dir_path+path, function (err, data) {
+    this.send_static = function(file_path,res){
+        fs.readFile(path.join(path.resolve(base_dir),file_path), function (err, data) {
               if (err) throw err;
               res.end(data);
         });
@@ -69,13 +72,20 @@ var htmlify = function(compiled_template){
 //--------------------------------------------------
 
 Ys.run = function(){
-    
+
+    var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
+    for(var i=0; i<mimes_raw.length; i++){
+        var next = mimes_raw[i].split(/\s+/g)
+        if(next && next.length === 2)    
+            mime_types[next[1]] = next[0];
+    }
+
     http.createServer(function (req, res) {
 
-        var path = url.parse(req.url).pathname;
+        var pathname = url.parse(req.url).pathname;
         for(var i=0; i < routes.length; i++){
             var regexp = RegExp(routes[i][0]);
-            if(!regexp.test(path) || typeof(routes[i][1][req.method.toLowerCase()])==="undefined")
+            if(!regexp.test(pathname) || typeof(routes[i][1][req.method.toLowerCase()])==="undefined")
                 continue;
 
             var handler = routes[i][1][req.method.toLowerCase()];
@@ -87,9 +97,10 @@ Ys.run = function(){
             if(typeof(handler)==="object"){
                
                 if("send_static" in handler){
-                    //MISSING - need to handle mime types
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    handler.send_static(path,res);
+                    var ext = path.extname(pathname).substring(1);
+                    var mime_type = mime_types[ext] 
+                    res.writeHead(200, {'Content-Type':mime_type});
+                    handler.send_static(pathname,res);
                     return; 
                 }
 

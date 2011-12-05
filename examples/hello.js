@@ -16,4 +16,7 @@ Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
     res.returnObject({"name" : "Bob"});
 }
 
+//return static file
+Ys("^/static/.*$").get.static(".");
+
 Ys.run();
