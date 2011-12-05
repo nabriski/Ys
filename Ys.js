@@ -1,9 +1,8 @@
-var http = require('http');
-var url = require('url');
-var fs = require('fs');
-var ejs = require('ejs');
-var path = require('path');
-
+var http = require('http'),
+    url = require('url'),
+    fs = require('fs'),
+    ejs = require('ejs'),
+    path = require('path');
 //var querystring = require('querystring');
 
 var mime_types = {}
@@ -62,16 +61,15 @@ var jsonify = function(object){
 var htmlify = function(compiled_template){
 
     return function(object){
-        if(typeof(object)==="undefined"){//no args object, just send the html
-            this.end(compiled_template(object));
-            return;
-        }
-        return compiled_template(object);
+        this.end(compiled_template(object));
     }
 }
 //--------------------------------------------------
 
-Ys.run = function(){
+Ys.run = function(port){
+
+    if(!port)
+        port = 8780;
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
@@ -127,7 +125,7 @@ Ys.run = function(){
 
         }
 
-    }).listen(8780, "127.0.0.1");
-    console.log('Server running at http://127.0.0.1:8780/');
+    }).listen(port, "127.0.0.1");
+    console.log('Server running at http://127.0.0.1:'+port+'/');
 }
 //--------------------------------------------------
