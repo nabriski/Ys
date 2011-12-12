@@ -71,6 +71,9 @@ Ys.run = function(port){
     if(!port)
         port = 8780;
 
+    if(!host)
+        host= "127.0.0.1";
+
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
         var next = mimes_raw[i].split(/\s+/g)
@@ -125,7 +128,7 @@ Ys.run = function(port){
 
         }
 
-    }).listen(port, "127.0.0.1");
-    console.log('Server running at http://127.0.0.1:'+port+'/');
+    }).listen(port,host);
+    console.log('Server running at '+host+':'+port+'/');
 }
 //--------------------------------------------------
