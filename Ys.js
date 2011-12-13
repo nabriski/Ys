@@ -65,7 +65,56 @@ var htmlify = function(compiled_template){
     }
 }
 //--------------------------------------------------
+var handle_request = function(req,res){
+        
+    var pathname = url.parse(req.url).pathname;
+    for(var i=0; i < routes.length; i++){
+        var regexp = RegExp(routes[i][0]);
+        if(!regexp.test(pathname) || typeof(routes[i][1][req.method.toLowerCase()])==="undefined")
+            continue;
 
+        var handler = routes[i][1][req.method.toLowerCase()];
+        if(typeof(handler)==="function"){
+            handler(req,res);
+            return;
+        }
+
+        if(typeof(handler)==="object"){
+           
+            if("send_static" in handler){
+                var ext = path.extname(pathname).substring(1);
+                var mime_type = mime_types[ext] 
+                res.writeHead(200, {'Content-Type':mime_type});
+                handler.send_static(pathname,res);
+                return; 
+            }
+
+            if("json" in handler){
+                res.writeHead(200, {'Content-Type': 'application/json'});
+                res.returnObject = jsonify;
+                handler.json(req,res);
+                return;
+            }
+            
+            if("html" in handler){
+
+                res.writeHead(200, {'Content-Type': 'text/html'});
+                if("args" in handler){//actual template
+                    res.returnObject = htmlify(handler.compiled);
+                    handler.args(req,res);
+                }
+                else
+                    res.end(htmlify(handler.compiled)());
+            }
+
+            return;
+        }
+
+    }
+
+    throw new Error(pathname +" >> No mapping for this path");
+}
+//--------------------------------------------------
 Ys.run = function(port){
 
     if(!port)
@@ -83,49 +132,13 @@ Ys.run = function(port){
 
     http.createServer(function (req, res) {
 
-        var pathname = url.parse(req.url).pathname;
-        for(var i=0; i < routes.length; i++){
-            var regexp = RegExp(routes[i][0]);
-            if(!regexp.test(pathname) || typeof(routes[i][1][req.method.toLowerCase()])==="undefined")
-                continue;
-
-            var handler = routes[i][1][req.method.toLowerCase()];
-            if(typeof(handler)==="function"){
-                handler(req,res);
-                return;
-            }
-
-            if(typeof(handler)==="object"){
-               
-                if("send_static" in handler){
-                    var ext = path.extname(pathname).substring(1);
-                    var mime_type = mime_types[ext] 
-                    res.writeHead(200, {'Content-Type':mime_type});
-                    handler.send_static(pathname,res);
-                    return; 
-                }
-
-                if("json" in handler){
-                    res.writeHead(200, {'Content-Type': 'application/json'});
-                    res.returnObject = jsonify;
-                    handler.json(req,res);
-                    return;
-                }
-                
-                if("html" in handler){
-
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    if("args" in handler){//actual template
-                        res.returnObject = htmlify(handler.compiled);
-                        handler.args(req,res);
-                    }
-                    else
-                        res.end(htmlify(handler.compiled)());
-                }
-
-                return;
-            }
-
+        try{
+            handle_request(req,res); 
+        }
+        catch(e){
+            var str = e.stack;
+            console.log(str);
+            res.end(str);
         }
 
     }).listen(port,host);
