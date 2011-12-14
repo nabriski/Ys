@@ -1,5 +1,5 @@
 # Ys
-### Node.js micro web framework.
+Node.js micro web framework.
 
 #### Hello World:
 
