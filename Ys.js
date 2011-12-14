@@ -115,7 +115,7 @@ var handle_request = function(req,res){
     throw new Error(pathname +" >> No mapping for this path");
 }
 //--------------------------------------------------
-Ys.run = function(port){
+Ys.run = function(port,host){
 
     if(!port)
         port = 8780;

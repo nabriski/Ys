@@ -1,6 +1,21 @@
 # Ys
 ### Node.js micro web framework.
 
+#### Hello World:
+
+```javascript
+
+var Ys = require('../Ys').Ys;
+
+Ys("^/$").get = function(req,res){
+    res.end("Hello World!");
+}
+
+Ys.run();
+```
+
+#### Examples:
+
 ```javascript
 var Ys = require('../Ys').Ys;
 
