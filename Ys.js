@@ -36,7 +36,11 @@ Handler.prototype.static = function(base_dir){
 
     this.send_static = function(file_path,res){
         fs.readFile(path.join(path.resolve(base_dir),file_path), function (err, data) {
-              if (err) throw err;
+              if (err){
+                res.writeHead(404);
+                res.end("404 - not found.");
+                return;
+              };
               res.end(data);
         });
     }
