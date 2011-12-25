@@ -69,15 +69,26 @@ var htmlify = function(compiled_template){
     }
 }
 //--------------------------------------------------
+var PATH_REGEXP = 0, HANDLERS = 1;
 var handle_request = function(req,res){
         
     var pathname = url.parse(req.url).pathname;
     for(var i=0; i < routes.length; i++){
-        var regexp = RegExp(routes[i][0]);
-        if(!regexp.test(pathname) || typeof(routes[i][1][req.method.toLowerCase()])==="undefined")
+        var regexp = RegExp(routes[i][PATH_REGEXP]);
+        var route = routes[i];
+        var match = regexp.exec(pathname);
+        if(!match)
             continue;
 
-        var handler = routes[i][1][req.method.toLowerCase()];
+        if(typeof(route[HANDLERS]["rewrite"]) === "string"){
+            pathname = route[HANDLERS]["rewrite"].replace("$1",match[1]);
+            continue; 
+        }
+
+        if(typeof(route[HANDLERS][req.method.toLowerCase()])==="undefined")
+            continue;
+
+        var handler = route[HANDLERS][req.method.toLowerCase()];
         if(typeof(handler)==="function"){
             handler(req,res);
             return;
@@ -130,9 +141,13 @@ Ys.run = function(port,host){
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
         var next = mimes_raw[i].split(/\s+/g)
-        if(next && next.length === 2)    
-            mime_types[next[1]] = next[0];
+        if(next && next.length >= 2)
+            for(var j=1; j < next.length; j++)    
+                mime_types[next[j]] = next[0];
     }
+
+    //correction for some types
+    //mime_types["mp3"] = "audio/mp3";
 
     http.createServer(function (req, res) {
 
