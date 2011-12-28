@@ -2,7 +2,8 @@ var http = require('http'),
     url = require('url'),
     fs = require('fs'),
     ejs = require('ejs'),
-    path = require('path');
+    path = require('path'),
+    exec = require('child_process').exec;
 //var querystring = require('querystring');
 
 var mime_types = {}
@@ -30,17 +31,37 @@ Handler.prototype.html = function(template_path){
 }
 //--------------------------------------------------
 Handler.prototype.static = function(base_dir){
+             
    
     if(typeof(base_dir)==="undefined")
         base_dir = "";
 
-    this.send_static = function(file_path,res){
-        fs.readFile(path.join(path.resolve(base_dir),file_path), function (err, data) {
+    this.send_static = function(file_path,res,headers){
+        var fs_path = path.join(path.resolve(base_dir),file_path)
+        fs.readFile(fs_path, function (err, data) {
               if (err){
                 res.writeHead(404);
                 res.end("404 - not found.");
                 return;
               };
+             if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
+                    
+                    var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",fs_path),
+                      function (error, stdout, stderr) {
+                            
+                          if(error)
+                                throw error;
+                            
+                        var lens = stdout.trim().split(":");
+                        var MINUTES = 1, SECONDS = 2;
+                        var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
+                        headers['X-Content-Duration'] = String(duration);
+                        res.writeHead(200,headers);
+                        res.end(data);
+                    });
+                    return;
+              }
+              res.writeHead(200,headers);
               res.end(data);
         });
     }
@@ -94,13 +115,13 @@ var handle_request = function(req,res){
             return;
         }
 
+
         if(typeof(handler)==="object"){
            
             if("send_static" in handler){
                 var ext = path.extname(pathname).substring(1);
-                var mime_type = mime_types[ext] 
-                res.writeHead(200, {'Content-Type':mime_type});
-                handler.send_static(pathname,res);
+                var mime_type = mime_types[ext]
+                handler.send_static(pathname,res,{'Content-Type':mime_type});
                 return; 
             }
 
