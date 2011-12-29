@@ -100,6 +100,13 @@ var handle_request = function(req,res){
         var match = regexp.exec(pathname);
         if(!match)
             continue;
+        
+        if(typeof(route[HANDLERS]["redirect"]) === "string"){
+            pathname = route[HANDLERS]["redirect"].replace("$1",match[1]);
+            res.writeHead(301,{"Location":pathname});
+            res.end();
+            return;
+        }
 
         if(typeof(route[HANDLERS]["rewrite"]) === "string"){
             pathname = route[HANDLERS]["rewrite"].replace("$1",match[1]);
