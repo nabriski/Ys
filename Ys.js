@@ -38,12 +38,42 @@ Handler.prototype.static = function(base_dir){
 
     this.send_static = function(file_path,res,headers){
         var fs_path = path.join(path.resolve(base_dir),file_path)
+        var fstream = null;
+        try{
+            fstream = fs.createReadStream(fs_path);
+        }
+        catch(err){
+            res.writeHead(404);
+            res.end("404 - not found.");
+            return;
+        }
+
+        if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
+            var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",fs_path),
+                  function (error, stdout, stderr) {
+                      if(error)
+                            throw error;
+                        
+                    var lens = stdout.trim().split(":");
+                    var MINUTES = 1, SECONDS = 2;
+                    var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
+                    headers['X-Content-Duration'] = String(duration);
+                    res.writeHead(200,headers);
+                    fstream.pipe(res);
+            });
+            return;
+        }
+        
+        res.writeHead(200,headers);
+        fstream.pipe(res);
+              /*
         fs.readFile(fs_path, function (err, data) {
               if (err){
                 res.writeHead(404);
                 res.end("404 - not found.");
                 return;
               };
+              
              if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
                     
                     var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",fs_path),
@@ -63,7 +93,7 @@ Handler.prototype.static = function(base_dir){
               }
               res.writeHead(200,headers);
               res.end(data);
-        });
+        });*/
     }
 }
 //--------------------------------------------------
@@ -176,6 +206,11 @@ Ys.run = function(port,host){
 
     //correction for some types
     //mime_types["mp3"] = "audio/mp3";
+    process.on('uncaughtException', function (err) {
+            var str = err.stack;
+            console.log(str);
+            //res.end(str);
+    }); 
 
     http.createServer(function (req, res) {
 
