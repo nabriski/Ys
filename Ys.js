@@ -3,7 +3,8 @@ var http = require('http'),
     fs = require('fs'),
     ejs = require('ejs'),
     path = require('path'),
-    exec = require('child_process').exec;
+    exec = require('child_process').exec,
+    util = require('util');
 //var querystring = require('querystring');
 
 var mime_types = {}
@@ -29,27 +30,65 @@ Handler.prototype.html = function(template_path){
     }); 
     return this;
 }
-//--------------------------------------------------
+//===================================================
 Handler.prototype.static = function(base_dir){
-             
-   
-    if(typeof(base_dir)==="undefined")
-        base_dir = "";
+  
+    //----------------------------------------------------
+    var send_stream = function(fs_path,req,res,headers) {
+       
+        
+        fs.stat(fs_path,function(err,stats){
 
-    this.send_static = function(file_path,res,headers){
-        var fs_path = path.join(path.resolve(base_dir),file_path);
-        var fstream = null;
-        try{
-            fstream = fs.createReadStream(fs_path);
-        }
-        catch(err){
-            res.writeHead(404);
-            res.end("404 - not found.");
-            return;
-        }
+            if(err){
+                res.writeHead(404);
+                res.end("404 - not found.");
+                return;
 
-        if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
-            var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",fs_path),
+            }
+            var ins = util.inspect(stats);
+            var size = ins.match(/size:\s*(\d+)/)[1];
+            headers['Content-Length'] = size;
+            
+           var flags = {};
+           console.log(req.headers);
+           range = req.headers['range'];
+            
+           if(range){
+                var match = range.match(/^bytes\s*=\s*(\d+)-(\d*)/);
+                if(match){
+                    var start = parseInt(match[1]);
+                    var end = match[2].length > 0 ? parseInt(match[2]) : parseInt(size) -1;
+                    headers["Content-Range"] =  'bytes %start-%end/%length'.replace("%start",start).replace("%end",end).replace("%length",size);
+                    res.writeHead(206,headers);
+                    flags["start"] = start;
+                    flags["end"] = end;
+                }
+                else{
+                    res.writeHead(416,headers);
+                }
+            }
+            else
+                res.writeHead(200,headers);
+            /*fs.readFile(fs_path, function (err, data) {
+              if (err) 
+                throw err;
+              
+                res.end(data);
+            });*/
+            var fstream = fs.createReadStream(fs_path,flags);
+            fstream.pipe(res);
+        
+        }); 
+
+        /*}
+            kv = range.split("="); 
+            if(!kv[1]) 
+        }*/
+    }
+    //----------------------------------------------------
+    var send_ogg= function(path,req,res,headers,flags){
+
+       var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",path),
                   function (error, stdout, stderr) {
                       if(error)
                             throw error;
@@ -58,46 +97,32 @@ Handler.prototype.static = function(base_dir){
                     var MINUTES = 1, SECONDS = 2;
                     var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
                     headers['X-Content-Duration'] = String(duration);
-                    res.writeHead(200,headers);
-                    fstream = fs.createReadStream(fs_path);
-                    fstream.pipe(res);
-            });
-            return;
+                    send_stream(path,req,res,headers);
+            }); 
+    }
+    //----------------------------------------------------
+    
+    if(typeof(base_dir)==="undefined")
+        base_dir = "";
+
+    this.send_static = function(file_path,req,res){
+
+        var ext = path.extname(file_path).substring(1),
+            mime_type = mime_types[ext],
+            fs_path = path.join(path.resolve(base_dir),file_path),
+            headers = {'Accept-Ranges': 'bytes','Content-Type':mime_type};
+        
+        
+
+        if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
+            send_ogg(fs_path,req,res,headers);
+            return;        
         }
         
-        res.writeHead(200,headers);
-        fstream.pipe(res);
-              /*
-        fs.readFile(fs_path, function (err, data) {
-              if (err){
-                res.writeHead(404);
-                res.end("404 - not found.");
-                return;
-              };
-              
-             if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
-                    
-                    var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",fs_path),
-                      function (error, stdout, stderr) {
-                            
-                          if(error)
-                                throw error;
-                            
-                        var lens = stdout.trim().split(":");
-                        var MINUTES = 1, SECONDS = 2;
-                        var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
-                        headers['X-Content-Duration'] = String(duration);
-                        res.writeHead(200,headers);
-                        res.end(data);
-                    });
-                    return;
-              }
-              res.writeHead(200,headers);
-              res.end(data);
-        });*/
+        send_stream(fs_path,req,res,headers);
     }
 }
-//--------------------------------------------------
+//===================================================
 var Ys = exports.Ys = function(url) {
     
     var idx = routes.indexOf(url);
@@ -157,9 +182,7 @@ var handle_request = function(req,res){
         if(typeof(handler)==="object"){
            
             if("send_static" in handler){
-                var ext = path.extname(pathname).substring(1);
-                var mime_type = mime_types[ext]
-                handler.send_static(pathname,res,{'Content-Type':mime_type});
+                handler.send_static(pathname,req,res);
                 return; 
             }
 
