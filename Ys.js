@@ -37,7 +37,7 @@ Handler.prototype.static = function(base_dir){
         base_dir = "";
 
     this.send_static = function(file_path,res,headers){
-        var fs_path = path.join(path.resolve(base_dir),file_path)
+        var fs_path = path.join(path.resolve(base_dir),file_path);
         var fstream = null;
         try{
             fstream = fs.createReadStream(fs_path);
@@ -59,6 +59,7 @@ Handler.prototype.static = function(base_dir){
                     var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
                     headers['X-Content-Duration'] = String(duration);
                     res.writeHead(200,headers);
+                    fstream = fs.createReadStream(fs_path);
                     fstream.pipe(res);
             });
             return;
