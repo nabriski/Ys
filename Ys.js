@@ -50,7 +50,7 @@ Handler.prototype.static = function(base_dir){
             headers['Content-Length'] = size;
             
            var flags = {};
-           console.log(req.headers);
+           //console.log(req.headers);
            range = req.headers['range'];
             
            if(range){
