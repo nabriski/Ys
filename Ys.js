@@ -172,6 +172,9 @@ var handle_request = function(req,res){
         if(typeof(route[HANDLERS][req.method.toLowerCase()])==="undefined")
             continue;
 
+        if(match.length > 1)
+            req.$1 = match[1];
+
         var handler = route[HANDLERS][req.method.toLowerCase()];
         if(typeof(handler)==="function"){
             handler(req,res);
