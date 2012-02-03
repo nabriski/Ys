@@ -215,7 +215,7 @@ var handle_request = function(req,res){
     throw new Error(pathname +" >> No mapping for this path");
 }
 //--------------------------------------------------
-Ys.run = function(port,host){
+Ys.run = function(port,host,user){
 
     if(!port)
         port = 8780;
@@ -239,7 +239,9 @@ Ys.run = function(port,host){
             //res.end(str);
     }); 
 
-    http.createServer(function (req, res) {
+
+
+    var server = http.createServer(function (req, res) {
 
         try{
             handle_request(req,res); 
@@ -250,7 +252,17 @@ Ys.run = function(port,host){
             res.end(str);
         }
 
-    }).listen(port,host);
+    });
+
+    if(user){
+        server.once("listening",function(){
+            process.setuid(user);        
+            //process.setgid(user);        
+        });        
+    }
+
+    server.listen(port,host);
+
     console.log('Server running at '+host+':'+port+'/');
 }
 //--------------------------------------------------
