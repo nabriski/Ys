@@ -124,8 +124,14 @@ Handler.prototype.static = function(base_dir){
 }
 //===================================================
 var Ys = exports.Ys = function(url) {
-    
-    var idx = routes.indexOf(url);
+   
+    var idx = -1;
+    for(var i=0; i < routes.length; i++){
+        if(routes[i][0]===url){
+            idx = i;
+        }
+    }
+
     if(idx===-1){
         routes.push([url,new Route()]);
         idx = routes.length - 1;
@@ -156,7 +162,7 @@ var handle_request = function(req,res){
         var match = regexp.exec(pathname);
         if(!match)
             continue;
-        
+       
         if(typeof(route[HANDLERS]["redirect"]) === "string"){
             pathname = route[HANDLERS]["redirect"].replace("$1",match[1]);
             res.writeHead(301,{"Location":pathname});
