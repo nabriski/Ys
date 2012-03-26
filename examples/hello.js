@@ -19,4 +19,7 @@ Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
 //return static file
 Ys("^/static/.*$").get.static(".");
 
+//return gzipped file
+Ys("^/gzip/.*$").get.gzip(".");
+
 Ys.run();

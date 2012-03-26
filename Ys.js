@@ -123,6 +123,31 @@ Handler.prototype.static = function(base_dir){
     }
 }
 //===================================================
+//naive implementation
+Handler.prototype.gzip = function(base_dir){
+    
+    if(typeof(base_dir)==="undefined")
+        base_dir = "";
+
+    this.send_gzip = function(file_path,req,res){
+
+        var ext = path.extname(file_path).substring(1),
+            mime_type = mime_types[ext],
+            fs_path = path.join(path.resolve(base_dir),file_path),
+            headers = {'Content-Type':mime_type,"Content-Encoding": "gzip"};
+        
+        child = exec('gzip -c '+fs_path,{encoding:"binary"},
+          function (error, stdout, stderr) {
+              if(error)
+                    throw error;
+
+            res.writeHead(200,headers);
+            res.end(stdout,"binary");
+
+        });        
+    }
+}
+//===================================================
 var Ys = exports.Ys = function(url) {
    
     var idx = -1;
@@ -190,6 +215,10 @@ var handle_request = function(req,res){
 
         if(typeof(handler)==="object"){
            
+            if("send_gzip" in handler){
+                handler.send_gzip(pathname,req,res);
+                return; 
+            }
             if("send_static" in handler){
                 handler.send_static(pathname,req,res);
                 return; 
