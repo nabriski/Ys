@@ -140,6 +140,7 @@ Handler.prototype.gzip = function(base_dir){
           function (error, stdout, stderr) {
               if(error)
                     throw error;
+            headers['Content-Length'] = stdout.length;
 
             res.writeHead(200,headers);
             res.end(stdout,"binary");
