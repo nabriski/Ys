@@ -4,7 +4,8 @@ var http = require('http'),
     ejs = require('ejs'),
     path = require('path'),
     exec = require('child_process').exec,
-    util = require('util');
+    util = require('util'),
+    zlib = require('zlib');
 //var querystring = require('querystring');
 
 var mime_types = {}
@@ -123,7 +124,6 @@ Handler.prototype.static = function(base_dir){
     }
 }
 //===================================================
-//naive implementation
 Handler.prototype.gzip = function(base_dir){
     
     if(typeof(base_dir)==="undefined")
@@ -134,18 +134,29 @@ Handler.prototype.gzip = function(base_dir){
         var ext = path.extname(file_path).substring(1),
             mime_type = mime_types[ext],
             fs_path = path.join(path.resolve(base_dir),file_path),
-            headers = {'Content-Type':mime_type,"Content-Encoding": "gzip"};
+            headers = {'Content-Type':mime_type};
+       
+
+        var raw = fs.createReadStream(fs_path);
+        var acceptEncoding = req.headers['accept-encoding'];
+        if (!acceptEncoding) 
+            acceptEncoding = '';
+
+        var stream = raw;
         
-        child = exec('gzip -c '+fs_path,{encoding:"binary"},
-          function (error, stdout, stderr) {
-              if(error)
-                    throw error;
-            headers['Content-Length'] = stdout.length;
-
-            res.writeHead(200,headers);
-            res.end(stdout,"binary");
-
-        });        
+        // Note: this is not a conformant accept-encoding parser.
+        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
+        if (acceptEncoding.match(/\bdeflate\b/)) {
+            headers['content-encoding'] = 'deflate';
+            stream = raw.pipe(zlib.createDeflate());
+        } else if (acceptEncoding.match(/\bgzip\b/)) {
+            headers['content-encoding'] = 'gzip';
+            stream = raw.pipe(zlib.createGzip());
+        }
+            
+       res.writeHead(200,headers);
+       stream.pipe(res); 
+               
     }
 }
 //===================================================
