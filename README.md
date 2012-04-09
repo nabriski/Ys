@@ -16,7 +16,7 @@ Ys.run();
 
 ### More Examples:
 
-#### Generic Response
+##### Generic Response
 ```javascript
 Ys("^/$").get = function(req,res){
     res.writeHead(200, {'Content-Type': 'text/html'});
@@ -24,14 +24,14 @@ Ys("^/$").get = function(req,res){
 }
 ```
 
-#### JSON Response
+##### JSON Response
 ```javascript
 Ys("^/json$").get.json = function(req,res){
     res.returnObject({"message" : "Hello World"});
 }
 ```
 
-#### HTML Templating
+##### HTML Templating
 ```javascript
 // return html response using template 'hello.html' (supports ejs templates for now)
 // Where 'hello.html' is:
@@ -41,7 +41,7 @@ Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
 }
 ```
 
-#### Static Files
+##### Static Files
 ```javascript
 //return static files
 Ys("^/static/.*$").get.static(".");
