@@ -193,7 +193,7 @@ var htmlify = function(compiled_template,req,headers){
     }
 }
 //--------------------------------------------------
-var stream_gzip = function(input,req,res,headers){
+var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
        
         var acceptEncoding = req.headers['accept-encoding'];
         if (!acceptEncoding) 
