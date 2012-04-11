@@ -1,0 +1,7 @@
+*.swp
+*~
+*.mp3
+*.ogg
+*.ogv
+*.webm
+conf.js
