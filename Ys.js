@@ -246,12 +246,11 @@ var handle_request = function(req,res){
             if("html" in handler){
 
                 res.writeHead(200, {'Content-Type': 'text/html'});
-                if("args" in handler){//actual template
-                    res.returnObject = htmlify(handler.compiled);
+                res.returnObject = htmlify(handler.compiled);
+                if("args" in handler)//actual template
                     handler.args(req,res);
-                }
                 else
-                    res.end(htmlify(handler.compiled)());
+                    res.returnObject();
             }
 
             return;
