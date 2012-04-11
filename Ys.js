@@ -125,7 +125,7 @@ Handler.prototype.static = function(base_dir){
 }
 //===================================================
 Handler.prototype.gzip = function(base_dir){
-    
+
     if(typeof(base_dir)==="undefined")
         base_dir = "";
 
@@ -138,6 +138,8 @@ Handler.prototype.gzip = function(base_dir){
        
 
         var raw = fs.createReadStream(fs_path);
+        write_gzip(raw,req,res,headers);
+        /*
         var acceptEncoding = req.headers['accept-encoding'];
         if (!acceptEncoding) 
             acceptEncoding = '';
@@ -156,7 +158,7 @@ Handler.prototype.gzip = function(base_dir){
             
        res.writeHead(200,headers);
        stream.pipe(res); 
-               
+       */     
     }
 }
 //===================================================
@@ -187,6 +189,28 @@ var htmlify = function(compiled_template){
     return function(object){
         this.end(compiled_template(object));
     }
+}
+//--------------------------------------------------
+var write_gzip = function(raw_stream,req,res,headers){
+        
+        var acceptEncoding = req.headers['accept-encoding'];
+        if (!acceptEncoding) 
+            acceptEncoding = '';
+
+        var stream = raw_stream;
+        
+        // Note: this is not a conformant accept-encoding parser.
+        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
+        if (acceptEncoding.match(/\bdeflate\b/)) {
+            headers['content-encoding'] = 'deflate';
+            stream = raw_stream.pipe(zlib.createDeflate());
+        } else if (acceptEncoding.match(/\bgzip\b/)) {
+            headers['content-encoding'] = 'gzip';
+            stream = raw_stream.pipe(zlib.createGzip());
+        }
+            
+       res.writeHead(200,headers);
+       stream.pipe(res);
 }
 //--------------------------------------------------
 var PATH_REGEXP = 0, HANDLERS = 1;
