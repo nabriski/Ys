@@ -223,7 +223,7 @@ var handle_request = function(req,res){
         var match = regexp.exec(pathname);
         if(!match)
             continue;
-       
+
         if(typeof(route[HANDLERS]["redirect"]) === "string"){
             pathname = route[HANDLERS]["redirect"].replace("$1",match[1]);
             res.writeHead(301,{"Location":pathname});
@@ -243,6 +243,17 @@ var handle_request = function(req,res){
             req.$1 = match[1];
 
         var handler = route[HANDLERS][req.method.toLowerCase()];
+
+        function isEmpty(obj) {
+            for(var prop in obj)
+                if(obj.hasOwnProperty(prop))
+                    return false;
+            return true;
+        }
+
+        if(isEmpty(handler))
+            throw new Error(pathname +" >> No handler defined for this path and method "+req.method);
+
         if(typeof(handler)==="function"){
             handler(req,res);
             return;
@@ -268,13 +279,13 @@ var handle_request = function(req,res){
             }
             
             if("html" in handler){
-
                 res.writeHead(200, {'Content-Type': 'text/html'});
                 res.returnObject = htmlify(handler.compiled);
                 if("args" in handler)//actual template
                     handler.args(req,res);
                 else
                     res.returnObject();
+
             }
 
             return;
