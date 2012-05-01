@@ -138,7 +138,7 @@ Handler.prototype.gzip = function(base_dir){
        
 
         var raw = fs.createReadStream(fs_path);
-        write_gzip(raw,req,res,headers);
+        stream_gzip(raw,req,res,headers);
         /*
         var acceptEncoding = req.headers['accept-encoding'];
         if (!acceptEncoding) 
@@ -184,33 +184,53 @@ var jsonify = function(object){
     this.end(JSON.stringify(object));
 }
 //--------------------------------------------------
-var htmlify = function(compiled_template){
+var htmlify = function(compiled_template,req,headers){
 
     return function(object){
-        this.end(compiled_template(object));
+        //this.end(compiled_template(object));
+        var html = compiled_template(object);
+	stream_gzip(html,req,this,headers);
     }
 }
 //--------------------------------------------------
-var write_gzip = function(raw_stream,req,res,headers){
-        
+var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
+       
         var acceptEncoding = req.headers['accept-encoding'];
         if (!acceptEncoding) 
             acceptEncoding = '';
 
-        var stream = raw_stream;
+        var stream = null,compression_stream = null;
         
         // Note: this is not a conformant accept-encoding parser.
         // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
         if (acceptEncoding.match(/\bdeflate\b/)) {
             headers['content-encoding'] = 'deflate';
-            stream = raw_stream.pipe(zlib.createDeflate());
+	    compression_stream = zlib.createDeflate(); 
         } else if (acceptEncoding.match(/\bgzip\b/)) {
             headers['content-encoding'] = 'gzip';
-            stream = raw_stream.pipe(zlib.createGzip());
+	    compression_stream = zlib.createGzip(); 
         }
-            
+        
        res.writeHead(200,headers);
-       stream.pipe(res);
+
+       if(typeof(input.pipe) === "function"){
+	    if(compression_stream)
+            	stream = input.pipe(compression_stream);
+	    else
+		stream = input;
+       	    stream.pipe(res);
+	    return;
+       }
+       
+       if(compression_stream){
+	    compression_stream.pipe(res);
+	    compression_stream.write(input);
+	    compression_stream.end();
+	    return;
+       }
+
+       res.write(input);
+
 }
 //--------------------------------------------------
 var PATH_REGEXP = 0, HANDLERS = 1;
@@ -281,6 +301,7 @@ var handle_request = function(req,res){
             if("html" in handler){
                 res.writeHead(200, {'Content-Type': 'text/html'});
                 res.returnObject = htmlify(handler.compiled);
+
                 if("args" in handler)//actual template
                     handler.args(req,res);
                 else
