@@ -271,7 +271,7 @@ var handle_request = function(req,res){
             return true;
         }
 
-        if(isEmpty(handler))
+        if(typeof(handler)==="object" && isEmpty(handler))
             throw new Error(pathname +" >> No handler defined for this path and method "+req.method);
 
         if(typeof(handler)==="function"){
