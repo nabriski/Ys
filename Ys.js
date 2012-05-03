@@ -189,7 +189,7 @@ var htmlify = function(compiled_template,req,headers){
     return function(object){
         //this.end(compiled_template(object));
         var html = compiled_template(object);
-	stream_gzip(html,req,this,headers);
+	    stream_gzip(html,req,this,headers);
     }
 }
 //--------------------------------------------------
@@ -246,7 +246,10 @@ var handle_request = function(req,res){
 
         if(typeof(route[HANDLERS]["redirect"]) === "string"){
             pathname = route[HANDLERS]["redirect"].replace("$1",match[1]);
-            res.writeHead(301,{"Location":pathname});
+            if(req.method.toLowerCase() == "post")
+                res.writeHead(307,{"Location":pathname});
+            else
+                res.writeHead(301,{"Location":pathname});
             res.end();
             return;
         }
@@ -272,7 +275,7 @@ var handle_request = function(req,res){
         }
 
         if(typeof(handler)==="object" && isEmpty(handler))
-            throw new Error(pathname +" >> No handler defined for this path and method "+req.method);
+            throw new Error(pathname +" >> No handler defined for selector '"+regexp+"' and method "+req.method);
 
         if(typeof(handler)==="function"){
             handler(req,res);
@@ -299,8 +302,8 @@ var handle_request = function(req,res){
             }
             
             if("html" in handler){
-                res.writeHead(200, {'Content-Type': 'text/html'});
-                res.returnObject = htmlify(handler.compiled);
+                var headers ={'Content-Type': 'text/html'};
+                res.returnObject = htmlify(handler.compiled,req,headers);
 
                 if("args" in handler)//actual template
                     handler.args(req,res);
