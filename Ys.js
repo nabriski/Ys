@@ -203,12 +203,12 @@ var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
         
         // Note: this is not a conformant accept-encoding parser.
         // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
-        if (acceptEncoding.match(/\bdeflate\b/)) {
+        if (acceptEncoding.match(/\bdeflate\b/) && req.headers['user-agent'].indexOf("MSIE") < 0) { //IE does not seem to support deflate very well
             headers['content-encoding'] = 'deflate';
-	    compression_stream = zlib.createDeflate(); 
+            compression_stream = zlib.createDeflate();
         } else if (acceptEncoding.match(/\bgzip\b/)) {
             headers['content-encoding'] = 'gzip';
-	    compression_stream = zlib.createGzip(); 
+            compression_stream = zlib.createGzip(); 
         }
         
        res.writeHead(200,headers);
