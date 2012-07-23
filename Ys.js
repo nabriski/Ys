@@ -180,6 +180,8 @@ var Ys = exports.Ys = function(url) {
 
 }
 //--------------------------------------------------
+exports.client = require('./client');
+//--------------------------------------------------
 var jsonify = function(object){
     this.end(JSON.stringify(object));
 }

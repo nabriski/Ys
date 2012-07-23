@@ -1,10 +1,11 @@
 var http = require('http'),
     assert = require('assert'),
     url = require('url'),
-    Ys = require('../Ys').Ys;
+    Ys = require('../../Ys').Ys;
 //--------------------------------------------
 process.on('uncaughtException', function (err) {
-    console.log(err);
+    var str = err.stack;
+    console.log(str);
     process.exit();
 });
 //--------------------------------------------
