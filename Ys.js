@@ -322,13 +322,16 @@ var handle_request = function(req,res){
     throw new Error(pathname +" >> No mapping for this path");
 }
 //--------------------------------------------------
-Ys.run = function(port,host,user){
+Ys.run = function(options){
 
-    if(!port)
-        port = 8780;
+	if(!options)
+	    options = {};
 
-    if(!host)
-        host= "127.0.0.1";
+    if(!options.port)
+        options.port = 8780;
+
+    if(!options.host)
+        options.host= "localhost";
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
@@ -347,7 +350,6 @@ Ys.run = function(port,host,user){
     }); 
 
 
-
     var server = http.createServer(function (req, res) {
 
         try{
@@ -361,15 +363,15 @@ Ys.run = function(port,host,user){
 
     });
 
-    if(user){
+    if(options.user){
         server.once("listening",function(){
-            process.setuid(user);        
+            process.setuid(options.user);        
             //process.setgid(user);        
         });        
     }
 
-    server.listen(port,host);
+    server.listen(options.port,options.host);
 
-    console.log('Server running at '+host+':'+port+'/');
+    console.log('Server running at '+options.host+':'+options.port+'/');
 }
 //--------------------------------------------------
