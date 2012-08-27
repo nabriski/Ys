@@ -4,6 +4,7 @@ var http = require('http'),
     ejs = require('ejs'),
     path = require('path'),
     exec = require('child_process').exec,
+    fork = require('child_process').fork,
     util = require('util'),
     zlib = require('zlib');
 //var querystring = require('querystring');
@@ -322,10 +323,29 @@ var handle_request = function(req,res){
     throw new Error(pathname +" >> No mapping for this path");
 }
 //--------------------------------------------------
+Ys.run_debug_parent = function(options){
+
+    var file = module.parent.filename;
+    var child = fork(file,["--child"]);
+
+    fs.watchFile(file,function (curr, prev) {
+        if(curr.mtime === prev.mtime)
+            return;
+        console.log("restarting server ...");
+        child.kill('SIGHUP');
+        child = fork(file,["--child"]);
+    });
+}
+//--------------------------------------------------
 Ys.run = function(options){
 
 	if(!options)
 	    options = {};
+
+    if(options.debug){
+        Ys.run_debug_parent(options);
+        return;
+    }
 
     if(!options.port)
         options.port = 8780;
