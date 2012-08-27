@@ -323,27 +323,32 @@ var handle_request = function(req,res){
     throw new Error(pathname +" >> No mapping for this path");
 }
 //--------------------------------------------------
-Ys.run_debug_parent = function(options){
+var run_debug_parent = function(options){
 
     var file = module.parent.filename;
-    var child = fork(file,["--child"]);
+    var child = fork(file,[],{env:{is_child:true}});
 
-    fs.watchFile(file,function (curr, prev) {
-        if(curr.mtime === prev.mtime)
-            return;
+	var on_exit = function () {
+		console.log('exited');
+		child = fork(file,[],{is_child:true});
+		child.on('exit',on_exit);
+	};
+	child.on('exit',on_exit);
+
+
+	fs.watch(file, function(){
         console.log("restarting server ...");
-        child.kill('SIGHUP');
-        child = fork(file,["--child"]);
-    });
-}
+        child.kill();
+	});
+};
 //--------------------------------------------------
 Ys.run = function(options){
 
 	if(!options)
 	    options = {};
 
-    if(options.debug){
-        Ys.run_debug_parent(options);
+    if(options.debug && !process.env.is_child){
+        run_debug_parent(options);
         return;
     }
 
