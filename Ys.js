@@ -325,29 +325,37 @@ var handle_request = function(req,res){
 //--------------------------------------------------
 var run_debug_parent = function(options){
 
-    var file = module.parent.filename;
+    var dir = path.dirname(module.parent.filename);
+    var module_file = module.parent.filename;
+    var prev_stat = fs.statSync(module_file); 
     var child = null;
 
 	var fork_child = function () {
-        console.log("forking");
-		child = fork(file,[],{env:{is_child:true}});
+		child = fork(module_file,[],{env:{is_child:true}});
 		child.on('exit',fork_child);
 	};
 
     fork_child();
 
-	fs.watch(file, function(){
-        console.log("restarting server ...");
-        child.kill();
-	});
-};
+    var tid = null;
+    fs.watch(dir, function(event,filename){
+        clearTimeout(tid);
+        tid = setTimeout(function(){
+            stat = fs.statSync(module_file);
+            if(stat.mtime.getTime() > prev_stat.mtime.getTime()){
+                console.log("restarting server...");
+                prev_stat = stat;
+                child.kill();
+            }
+        }, 1000);
+    });
+ };
 //--------------------------------------------------
 Ys.run = function(options){
 
 	if(!options)
 	    options = {};
 
-    console.log(process.pid + ", " + process.env.is_child)
     if(options.debug && !process.env.is_child){
         run_debug_parent(options);
         return;
