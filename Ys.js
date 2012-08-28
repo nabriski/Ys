@@ -326,15 +326,15 @@ var handle_request = function(req,res){
 var run_debug_parent = function(options){
 
     var file = module.parent.filename;
-    var child = fork(file,[],{env:{is_child:true}});
+    var child = null;
 
-	var on_exit = function () {
-		console.log('exited');
-		child = fork(file,[],{is_child:true});
-		child.on('exit',on_exit);
+	var fork_child = function () {
+        console.log("forking");
+		child = fork(file,[],{env:{is_child:true}});
+		child.on('exit',fork_child);
 	};
-	child.on('exit',on_exit);
 
+    fork_child();
 
 	fs.watch(file, function(){
         console.log("restarting server ...");
@@ -347,6 +347,7 @@ Ys.run = function(options){
 	if(!options)
 	    options = {};
 
+    console.log(process.pid + ", " + process.env.is_child)
     if(options.debug && !process.env.is_child){
         run_debug_parent(options);
         return;
