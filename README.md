@@ -11,8 +11,9 @@ Ys("^/$").get = function(req,res){
     res.end("Hello World!");
 }
 
-Ys.run();
+Ys.run({debug:true});
 ```
+In debug mode the server reloads itself on source changes. Do not use in production.
 
 ### More Examples:
 
