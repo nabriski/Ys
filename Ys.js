@@ -384,7 +384,7 @@ Ys.run = function(options){
     }); 
 
 
-    var server = http.createServer(function (req, res) {
+    var server = Ys.server =http.createServer(function (req, res) {
 
         try{
             handle_request(req,res); 
@@ -407,5 +407,10 @@ Ys.run = function(options){
     server.listen(options.port,options.host);
 
     console.log('Server running at '+options.host+':'+options.port+'/');
+}
+//--------------------------------------------------
+Ys.stop = function(){
+    console.log("shutting down ...");
+    Ys.server.close();
 }
 //--------------------------------------------------
