@@ -1,6 +1,6 @@
 var Ys = require('../../Ys').Ys,
-    request = require('superagent');
-   
+    request = require('request');
+
 module.exports = {
     setUp: function (callback) {
         //config & run server
@@ -26,14 +26,15 @@ module.exports = {
         callback();
     },
     test_get: function (test) {
-        var agent = request.agent();
-        agent.get('http://localhost:8780/').type('html').end(function(err, res) {
-            //test.assert(!err);
 
-            console.log(res.body);
+        var request = require('request');
+        request('http://localhost:8780/', function (error, res, body) {
+            
             test.equals(res.statusCode,200);
-            test.equals(res.body,"Hello World!");
+            test.equals(body,"Hello World!");
             test.done();
-        }); 
+
+         })
+         
     }
 };
