@@ -217,14 +217,15 @@ var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
        res.writeHead(200,headers);
 
        if(typeof(input.pipe) === "function"){
-	    if(compression_stream)
-            	stream = input.pipe(compression_stream);
-	    else
-		stream = input;
-       	    stream.pipe(res);
-	    return;
+			   if(compression_stream)
+					stream = input.pipe(compression_stream);
+			   else
+					stream = input;
+
+			   stream.pipe(res);
+			   return;
        }
-       
+      
        if(compression_stream){
 	    compression_stream.pipe(res);
 	    compression_stream.write(input);
@@ -232,7 +233,7 @@ var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
 	    return;
        }
 
-       res.write(input);
+       res.end(input);
 
 }
 //--------------------------------------------------
