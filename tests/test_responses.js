@@ -3,7 +3,7 @@ var fs = require('fs'),
 	Ys = require('../../Ys').Ys;
 
 module.exports = {
-    setUp: function (callback) {
+    test_init: function (test) {
         //config & run server
         Ys("^/$").get = function(req,res){
             res.end("Hello World!");
@@ -13,8 +13,8 @@ module.exports = {
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end("<h1>Hello World!</h1>");
         }
-		
-		Ys("^/html/$").get.html = function(req,res){
+        
+		Ys("^/html/$").get = function(req,res){
             res.end("<h1>Hello World!</h1>");
         }
 
@@ -30,13 +30,9 @@ module.exports = {
 
                 
         Ys.run();
-        callback();
+        test.done();
     },
-    tearDown: function (callback) {
-        // clean up
-        Ys.stop();
-        callback();
-    },
+    
     test_get: function (test) {
 
         request('http://localhost:8780/', function (error, res, body) {
@@ -57,7 +53,7 @@ module.exports = {
          })
          
     },
-	
+
 	test_html: function (test) {
 
         request('http://localhost:8780/raw_html/', function (error, res, body) {
@@ -90,8 +86,14 @@ module.exports = {
             test.done();
          })
          
-    }
-
+    },
+	
+	test_cleanup: function (test) {
+        // clean up
+        Ys.stop();
+		fs.unlinkSync("/tmp/tmpl.html");
+        test.done();
+    },
     /*
      
     Ys("^/raw_html/$").get = function(req,res){
