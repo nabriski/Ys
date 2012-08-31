@@ -18,6 +18,8 @@ module.exports = {
             res.end("<h1>Hello World!</h1>");
         }
 
+        Ys("^/json_alias/$").rewrite = "/json/";
+
         Ys("^/json/$").get.json = function(req,res){
             res.returnObject({"message" : "Hello World"});
         } 
@@ -28,6 +30,10 @@ module.exports = {
 			res.returnObject({"name" : "Bob"});
         }
 
+		fs.writeFileSync("/tmp/static.txt","Hello World!");
+		Ys("^/static.txt$").get.static("/tmp/");
+
+		Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
                 
         Ys.run();
         test.done();
@@ -77,6 +83,27 @@ module.exports = {
          
     },
 
+	test_redirect: function (test) {
+
+        request('http://localhost:8780/json', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"application/json");
+            test.equals(JSON.parse(body)["message"],"Hello World");
+            test.done();
+         })
+         
+    },
+
+	test_rewrite: function (test) {
+
+        request('http://localhost:8780/json', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"application/json");
+            test.equals(JSON.parse(body)["message"],"Hello World");
+            test.done();
+         })
+         
+    },
 	test_html_template: function (test) {
 
         request('http://localhost:8780/html_template/', function (error, res, body) {
@@ -87,22 +114,22 @@ module.exports = {
          })
          
     },
-	
+
+	test_static: function (test) {
+
+        request('http://localhost:8780/static.txt', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"text/plain");
+            test.equals(body,"Hello World!");
+            test.done();
+         })
+         
+    },	
 	test_cleanup: function (test) {
         // clean up
         Ys.stop();
 		fs.unlinkSync("/tmp/tmpl.html");
         test.done();
     },
-    /*
-     
-    Ys("^/raw_html/$").get = function(req,res){
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end("<h1>Hello World!</h1>");
-}
-
-Ys("^/json/$").get.json = function(req,res){
-    res.returnObject({"message" : "Hello World"});
-} 
-     */
+    
 };
