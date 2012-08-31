@@ -129,6 +129,7 @@ module.exports = {
         // clean up
         Ys.stop();
 		fs.unlinkSync("/tmp/tmpl.html");
+		fs.unlinkSync("/tmp/static.txt");
         test.done();
     },
     
