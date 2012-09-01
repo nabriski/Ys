@@ -45,9 +45,26 @@ Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
 ##### Static Files
 ```javascript
 //return static files
-Ys("^/static/.*$").get.static(".");
+Ys("^/static/.*$").get.static = ".";
 
 //return gzipped file (depends on client's accept encoding)
-Ys("^/gzip/.*$").get.gzip(".");
+Ys("^/gzip/.*$").get.gzip = ".";
+
+```
+
+##### Redirect
+```javascript
+Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
+```
+
+##### Rewrite
+```javascript
+//rewrite /json_alias/ to /json/
+// must appear before the /json/ route
+Ys("^/json_alias/$").rewrite = "/json/";
+
+Ys("^/json$").get.json = function(req,res){
+    res.returnObject({"message" : "Hello World"});
+}
 
 ```
