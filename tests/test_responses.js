@@ -31,7 +31,7 @@ module.exports = {
         }
 
 		fs.writeFileSync("/tmp/static.txt","Hello World!");
-		Ys("^/static.txt$").get.static("/tmp/");
+		Ys("^/static.txt$").get.static = "/tmp/";
 
 		Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
                 
@@ -48,7 +48,6 @@ module.exports = {
          })
          
     },
-
     test_raw_html: function (test) {
 
         request('http://localhost:8780/raw_html/', function (error, res, body) {
@@ -59,7 +58,6 @@ module.exports = {
          })
          
     },
-
 	test_html: function (test) {
 
         request('http://localhost:8780/raw_html/', function (error, res, body) {
@@ -71,7 +69,6 @@ module.exports = {
          
     },
 
-
     test_json: function (test) {
 
         request('http://localhost:8780/json/', function (error, res, body) {
@@ -82,7 +79,6 @@ module.exports = {
          })
          
     },
-
 	test_redirect: function (test) {
 
         request('http://localhost:8780/json', function (error, res, body) {
@@ -104,6 +100,7 @@ module.exports = {
          })
          
     },
+
 	test_html_template: function (test) {
 
         request('http://localhost:8780/html_template/', function (error, res, body) {
@@ -124,7 +121,7 @@ module.exports = {
             test.done();
          })
          
-    },	
+    },
 	test_cleanup: function (test) {
         // clean up
         Ys.stop();

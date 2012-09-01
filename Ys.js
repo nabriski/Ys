@@ -8,37 +8,35 @@ var http = require('http'),
     util = require('util'),
     zlib = require('zlib');
 //var querystring = require('querystring');
+//===================================================
+var Ys = exports.Ys = function(url_regexp) {
+	
+	var ys_inst = this;
+	if(!this._html)
+			ys_inst = Ys;
+   
+	if(typeof(ys_inst.routes)!='object')
+			ys_inst.routes = [];
 
-var mime_types = {}
-var routes = []
-//--------------------------------------------------
-var Route = function(){
-    
-    this.get = new Handler();
-    this.post = new Handler();
-    return this;
-}
-//--------------------------------------------------
-var Handler = function(){
-    return this;
-}
-//--------------------------------------------------
-Handler.prototype.html = function(template_path){
-    //load template
-    var t = this;
-    fs.readFile(template_path, function (err, data) {
-          if (err) throw err;
-          t.compiled = ejs.compile(String(data));
-    }); 
-    return this;
+    var matched = ys_inst.routes.filter(function(route){
+        return route["regexp"] === url_regexp;
+	});
+
+
+	return matched[0] || (function(){
+		var route = {"regexp":url_regexp,"get":{},"post":{}};
+		route.get.html =this._html_template(route.get); 
+		route.post.html =this._html_template(route.post); 
+    	this.routes.push(route);
+    	return route;
+	}).call(ys_inst);
+
 }
 //===================================================
-Handler.prototype.static = function(base_dir){
-  
-    //----------------------------------------------------
-    var send_stream = function(fs_path,req,res,headers) {
+Ys.mime_types = {}
+//===================================================
+Ys.send_stream = function(fs_path,req,res,headers) {
        
-        
         fs.stat(fs_path,function(err,stats){
 
             if(err){
@@ -71,132 +69,78 @@ Handler.prototype.static = function(base_dir){
             }
             else
                 res.writeHead(200,headers);
-            /*fs.readFile(fs_path, function (err, data) {
-              if (err) 
-                throw err;
-              
-                res.end(data);
-            });*/
+            
             var fstream = fs.createReadStream(fs_path,flags);
             fstream.pipe(res);
         
         }); 
 
-        /*}
-            kv = range.split("="); 
-            if(!kv[1]) 
-        }*/
-    }
-    //----------------------------------------------------
-    var send_ogg= function(path,req,res,headers,flags){
+};
+//===================================================
+Ys.send_ogg= function(path,req,res,headers,flags){
 
-       var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",path),
-                  function (error, stdout, stderr) {
-                      if(error)
-                            throw error;
-                        
-                    var lens = stdout.trim().split(":");
-                    var MINUTES = 1, SECONDS = 2;
-                    var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
-                    headers['X-Content-Duration'] = String(duration);
-                    send_stream(path,req,res,headers);
-            }); 
-    }
-    //----------------------------------------------------
-    
-    if(typeof(base_dir)==="undefined")
-        base_dir = "";
-
-    this.send_static = function(file_path,req,res){
-
-        var ext = path.extname(file_path).substring(1),
-            mime_type = mime_types[ext],
-            fs_path = path.join(path.resolve(base_dir),file_path),
-            headers = {'Accept-Ranges': 'bytes','Content-Type':mime_type};
-        
-        
-
-        if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
-            send_ogg(fs_path,req,res,headers);
-            return;        
-        }
-        
-        send_stream(fs_path,req,res,headers);
-    }
+	var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",path),
+		  function (error, stdout, stderr) {
+			  if(error)
+					throw error;
+				
+			var lens = stdout.trim().split(":");
+			var MINUTES = 1, SECONDS = 2;
+			var duration = parseFloat(lens[MINUTES])*60 + parseFloat(lens[SECONDS]);
+			headers['X-Content-Duration'] = String(duration);
+			send_stream(path,req,res,headers);
+	}); 
 }
 //===================================================
-Handler.prototype.gzip = function(base_dir){
+Ys.send_static = function(base_dir,file_path,req,res){
 
-    if(typeof(base_dir)==="undefined")
-        base_dir = "";
-
-    this.send_gzip = function(file_path,req,res){
-
-        var ext = path.extname(file_path).substring(1),
-            mime_type = mime_types[ext],
-            fs_path = path.join(path.resolve(base_dir),file_path),
-            headers = {'Content-Type':mime_type};
-       
-
-        var raw = fs.createReadStream(fs_path);
-        stream_gzip(raw,req,res,headers);
-        /*
-        var acceptEncoding = req.headers['accept-encoding'];
-        if (!acceptEncoding) 
-            acceptEncoding = '';
-
-        var stream = raw;
+	var ext = path.extname(file_path).substring(1),
+		mime_type = this.mime_types[ext],
+		fs_path = path.join(path.resolve(base_dir),file_path),
+		headers = {'Accept-Ranges': 'bytes','Content-Type':mime_type};
         
-        // Note: this is not a conformant accept-encoding parser.
-        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
-        if (acceptEncoding.match(/\bdeflate\b/)) {
-            headers['content-encoding'] = 'deflate';
-            stream = raw.pipe(zlib.createDeflate());
-        } else if (acceptEncoding.match(/\bgzip\b/)) {
-            headers['content-encoding'] = 'gzip';
-            stream = raw.pipe(zlib.createGzip());
-        }
-            
-       res.writeHead(200,headers);
-       stream.pipe(res); 
-       */     
-    }
+
+	if(Ys.ogg_header_support && headers["Content-Type"] && headers["Content-Type"].match(/^\w+\/ogg$/)){
+			send_ogg(fs_path,req,res,headers);
+			return;        
+	}
+        
+	this.send_stream(fs_path,req,res,headers);
 }
 //===================================================
-var Ys = exports.Ys = function(url) {
-   
-    var idx = -1;
-    for(var i=0; i < routes.length; i++){
-        if(routes[i][0]===url){
-            idx = i;
-        }
-    }
+Ys.send_gzip = function(base_dir,file_path,req,res){
 
-    if(idx===-1){
-        routes.push([url,new Route()]);
-        idx = routes.length - 1;
-    }
+	var ext = path.extname(file_path).substring(1),
+	mime_type = this.mime_types[ext],
+	fs_path = path.join(path.resolve(base_dir),file_path),
+	headers = {'Content-Type':mime_type};
 
-    return routes[idx][1]
+	var raw = fs.createReadStream(fs_path);
+	stream_gzip(raw,req,res,headers);
+	 
+}
 
+//===================================================
+Ys._html_template = function(parent){
+
+	return function(template_path){
+		parent.html_template = function(object){
+		 	//load template
+			var res = this;
+		 	fs.readFile(template_path, function (err, data) {
+				if (err) throw err;
+				var compiled = ejs.compile(String(data));
+				res.end(compiled(object));
+		 	});	
+		};
+
+		return parent.html_template;
+	};
 }
 //--------------------------------------------------
 exports.client = require('./client');
 //--------------------------------------------------
-var jsonify = function(object){
-    this.end(JSON.stringify(object));
-}
-//--------------------------------------------------
-var htmlify = function(compiled_template,req,headers){
-
-    return function(object){
-        //this.end(compiled_template(object));
-        var html = compiled_template(object);
-	    stream_gzip(html,req,this,headers);
-    }
-}
-//--------------------------------------------------
-var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
+Ys.stream_gzip = function(input,req,res,headers){
        
         var acceptEncoding = req.headers['accept-encoding'];
         if (!acceptEncoding) 
@@ -237,91 +181,124 @@ var stream_gzip = Ys.stream_gzip = function(input,req,res,headers){
 
 }
 //--------------------------------------------------
-var PATH_REGEXP = 0, HANDLERS = 1;
-var handle_request = function(req,res){
+Ys.handlers = [
+	
+	function redirect(route,req,res){
+	
+		if(typeof(route.redirect) != "string") return false;
         
-    var pathname = url.parse(req.url).pathname;
-    for(var i=0; i < routes.length; i++){
-        var regexp = RegExp(routes[i][PATH_REGEXP]);
-        var route = routes[i];
-        var match = regexp.exec(pathname);
-        if(!match)
-            continue;
+     	redirect_to = route["redirect"].replace("$1",req.$1);
+		var statusCode = 301;
+		
+		if(req.method == "post") statusCode = 307;
+		res.writeHead(statusCode,{"Location":redirect_to});
+		res.end();
+        return true;
+	},
 
-        if(typeof(route[HANDLERS]["redirect"]) === "string"){
-            pathname = route[HANDLERS]["redirect"].replace("$1",match[1]);
-            if(req.method.toLowerCase() == "post")
-                res.writeHead(307,{"Location":pathname});
-            else
-                res.writeHead(301,{"Location":pathname});
-            res.end();
-            return;
-        }
+	function rewrite(route,req,res){
+		if(typeof(route.rewrite) != "string") return false;
 
-        if(typeof(route[HANDLERS]["rewrite"]) === "string"){
-            pathname = route[HANDLERS]["rewrite"].replace("$1",match[1]);
-            continue; 
-        }
+        req.pathname = route.rewrite.replace("$1",req.$1);
+		return false;//so we continue processing the request with the re-written pathname!
+	},
 
-        if(typeof(route[HANDLERS][req.method.toLowerCase()])==="undefined")
-            continue;
+	function gzip(route,req,res){
+		if(typeof(route[req.method].gzip) != "string") return false;
+		var base_dir = route[req.method].gzip; 
+		this.send_gzip(base_dir,req.pathname,req,res);
+		return true;
+	},
 
-        if(match.length > 1)
-            req.$1 = match[1];
+	function static(route,req,res){
+		if(typeof(route[req.method].static) != "string") return false;
+		var base_dir = route[req.method].static; 
+		this.send_static(base_dir,req.pathname,req,res);
+		return true;
+	},
 
-        var handler = route[HANDLERS][req.method.toLowerCase()];
+	function raw(route,req,res){
+	
+		if(typeof(route[req.method]) != "function") return false;
 
-        function isEmpty(obj) {
-            for(var prop in obj)
-                if(obj.hasOwnProperty(prop))
-                    return false;
-            return true;
-        }
+		res.writeHead(200, {'Content-Type': 'text/html'});
 
-        if(typeof(handler)==="object" && isEmpty(handler))
-            throw new Error(pathname +" >> No handler defined for selector '"+regexp+"' and method "+req.method);
+		route[req.method](req,res);
 
-        if(typeof(handler)==="function"){
-            handler(req,res);
-            return;
-        }
+		return true;
+	
+	},
+
+	function json(route,req,res){
+		if(typeof(route[req.method].json) != "function") return false;
+		
+		res.writeHead(200, {'Content-Type': 'application/json'});
+		res.returnObject = function(object){
+    		this.end(JSON.stringify(object));
+		};
+		route[req.method].json(req,res);
+		return true;
+		
+	},
+
+	function html(route,req,res){
+		if(typeof(route[req.method].json) != "function") return false;
+		res.writeHead(200, {'Content-Type': 'text/html'});
+		route[req.method].html(req,res);
+		return true;
+		
+	},
+	
+	function html_template(route,req,res){
+
+		if(typeof(route[req.method].html_template) != "function") return false;
+
+		res.writeHead(200, {'Content-Type': 'text/html'});
+
+		res.returnObject = function(object){
+
+			route[req.method].html_template.call(this,object);
+		};
+			
+		route[req.method].html_template.args(req,res);
+		return true;	
+	}
 
 
-        if(typeof(handler)==="object"){
-           
-            if("send_gzip" in handler){
-                handler.send_gzip(pathname,req,res);
-                return; 
-            }
-            if("send_static" in handler){
-                handler.send_static(pathname,req,res);
-                return; 
-            }
+];
 
-            if("json" in handler){
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                res.returnObject = jsonify;
-                handler.json(req,res);
-                return;
-            }
-            
-            if("html" in handler){
-                var headers ={'Content-Type': 'text/html'};
-                res.returnObject = htmlify(handler.compiled,req,headers);
+//--------------------------------------------------
+Ys.handle_request = function(req,res){
+        
+    req.pathname = url.parse(req.url).pathname;
+	req.method = req.method.toLowerCase();
 
-                if("args" in handler)//actual template
-                    handler.args(req,res);
-                else
-                    res.returnObject();
+	var route = null;
+	//find matching route
+	this.routes.every(function(r){
+        var regexp = RegExp(r.regexp);
+		var match = regexp.exec(req.pathname);
+        if(match){
+			route = r;
+			if(match.length > 1) req.$1 = match[1]; 
+			return false;
+		}
+		return true;	
+	 });
 
-            }
 
-            return;
-        }
+	if(!route)
+		throw new Error(pathname +" >> No mapping for this path");
 
-    }
 
-    throw new Error(pathname +" >> No mapping for this path");
+	var ys_inst = this;
+	var request_handled = !ys_inst.handlers.every(function(handler){
+		return !handler.call(ys_inst,route,req,res);//reverse return value so every will work correctly
+	});
+
+        
+    if(!request_handled) 
+    	throw new Error(req.pathname +" >> No mapping for this path");
 }
 //--------------------------------------------------
 var run_debug_parent = function(options){
@@ -373,7 +350,7 @@ Ys.run = function(options){
         var next = mimes_raw[i].split(/\s+/g)
         if(next && next.length >= 2)
             for(var j=1; j < next.length; j++)    
-                mime_types[next[j]] = next[0];
+                this.mime_types[next[j]] = next[0];
     }
 
     //correction for some types
@@ -385,10 +362,11 @@ Ys.run = function(options){
     }); 
 
 
+	var ys_inst = this;
     var server = Ys.server =http.createServer(function (req, res) {
 
         try{
-            handle_request(req,res); 
+            ys_inst.handle_request(req,res); 
         }
         catch(e){
             var str = e.stack;
