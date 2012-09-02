@@ -116,7 +116,7 @@ Ys.send_gzip = function(base_dir,file_path,req,res){
 	headers = {'Content-Type':mime_type};
 
 	var raw = fs.createReadStream(fs_path);
-	stream_gzip(raw,req,res,headers);
+	this.stream_gzip(raw,req,res,headers);
 	 
 }
 
