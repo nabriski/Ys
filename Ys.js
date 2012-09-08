@@ -96,7 +96,7 @@ Router.prototype.send_gzip = function(base_dir,file_path,req,res){
 	headers = {'Content-Type':mime_type};
 
 	var raw = fs.createReadStream(fs_path);
-	stream_gzip(raw,req,res,headers);
+	this.stream_gzip(raw,req,res,headers);
 	 
 }
 
@@ -255,15 +255,15 @@ Router.prototype.handle_request = function(req,res){
 
 	var route = null;
 	//find matching route
-	this.routes.every(function(r){
+	this.routes.some(function(r){
         var regexp = RegExp(r.regexp);
 		var match = regexp.exec(req.pathname);
         if(match){
 			route = r;
 			if(match.length > 1) req.$1 = match[1]; 
-			return false;
+			return true;
 		}
-		return true;	
+		return false;	
 	 });
 
 
@@ -272,8 +272,8 @@ Router.prototype.handle_request = function(req,res){
 
 
 	var ys_inst = this;
-	var request_handled = !ys_inst.handlers.every(function(handler){
-		return !handler.call(ys_inst,route,req,res);//reverse return value so every will work correctly
+	var request_handled = ys_inst.handlers.some(function(handler){
+		return handler.call(ys_inst,route,req,res);
 	});
 
         
