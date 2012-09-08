@@ -9,33 +9,13 @@ var http = require('http'),
     zlib = require('zlib');
 //var querystring = require('querystring');
 //===================================================
-var Ys = exports.Ys = function(url_regexp) {
-	
-	var ys_inst = this;
-	if(!this._html)
-			ys_inst = Ys;
-   
-	if(typeof(ys_inst.routes)!='object')
-			ys_inst.routes = [];
-
-    var matched = ys_inst.routes.filter(function(route){
-        return route["regexp"] === url_regexp;
-	});
-
-
-	return matched[0] || (function(){
-		var route = {"regexp":url_regexp,"get":{},"post":{}};
-		route.get.html =this._html_template(route.get); 
-		route.post.html =this._html_template(route.post); 
-    	this.routes.push(route);
-    	return route;
-	}).call(ys_inst);
-
-}
+var Router = function(){};
 //===================================================
-Ys.mime_types = {}
+Router.prototype.routes = [];
 //===================================================
-Ys.send_stream = function(fs_path,req,res,headers) {
+Router.prototype.mime_types = {}
+//===================================================
+Router.prototype.send_stream = function(fs_path,req,res,headers) {
        
         fs.stat(fs_path,function(err,stats){
 
@@ -77,7 +57,7 @@ Ys.send_stream = function(fs_path,req,res,headers) {
 
 };
 //===================================================
-Ys.send_ogg= function(path,req,res,headers,flags){
+Router.prototype.send_ogg= function(path,req,res,headers,flags){
 
 	var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",path),
 		  function (error, stdout, stderr) {
@@ -92,7 +72,7 @@ Ys.send_ogg= function(path,req,res,headers,flags){
 	}); 
 }
 //===================================================
-Ys.send_static = function(base_dir,file_path,req,res){
+Router.prototype.send_static = function(base_dir,file_path,req,res){
 
 	var ext = path.extname(file_path).substring(1),
 		mime_type = this.mime_types[ext],
@@ -108,7 +88,7 @@ Ys.send_static = function(base_dir,file_path,req,res){
 	this.send_stream(fs_path,req,res,headers);
 }
 //===================================================
-Ys.send_gzip = function(base_dir,file_path,req,res){
+Router.prototype.send_gzip = function(base_dir,file_path,req,res){
 
 	var ext = path.extname(file_path).substring(1),
 	mime_type = this.mime_types[ext],
@@ -121,7 +101,7 @@ Ys.send_gzip = function(base_dir,file_path,req,res){
 }
 
 //===================================================
-Ys._html_template = function(parent){
+Router.prototype._html_template = function(parent){
 
 	return function(template_path){
 		parent.html_template = function(object){
@@ -140,7 +120,7 @@ Ys._html_template = function(parent){
 //--------------------------------------------------
 exports.client = require('./client');
 //--------------------------------------------------
-Ys.stream_gzip = function(input,req,res,headers){
+Router.prototype.stream_gzip = function(input,req,res,headers){
        
         var acceptEncoding = req.headers['accept-encoding'];
         if (!acceptEncoding) 
@@ -181,7 +161,7 @@ Ys.stream_gzip = function(input,req,res,headers){
 
 }
 //--------------------------------------------------
-Ys.handlers = [
+Router.prototype.handlers = [
 	
 	function redirect(route,req,res){
 	
@@ -268,7 +248,7 @@ Ys.handlers = [
 ];
 
 //--------------------------------------------------
-Ys.handle_request = function(req,res){
+Router.prototype.handle_request = function(req,res){
         
     req.pathname = url.parse(req.url).pathname;
 	req.method = req.method.toLowerCase();
@@ -299,6 +279,27 @@ Ys.handle_request = function(req,res){
         
     if(!request_handled) 
     	throw new Error(req.pathname +" >> No mapping for this path");
+}
+//--------------------------------------------------
+var Ys = exports.Ys = function(url_regexp) {
+	
+	var router = this;
+   	if(router === global){
+		router = Ys.router = new Router();
+	}
+
+    var matched = router.routes.filter(function(route){
+        return route["regexp"] === url_regexp;
+	});
+
+	return matched[0] || (function(){
+		var route = {"regexp":url_regexp,"get":{},"post":{}};
+		route.get.html = router._html_template(route.get); 
+		route.post.html = router._html_template(route.post); 
+    	this.routes.push(route);
+    	return route;
+	}).call(router);
+
 }
 //--------------------------------------------------
 var run_debug_parent = function(options){
@@ -345,12 +346,16 @@ Ys.run = function(options){
     if(!options.host)
         options.host= "localhost";
 
+	var router = this;
+	if(router === Ys)
+		router = Ys.router;
+
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
         var next = mimes_raw[i].split(/\s+/g)
         if(next && next.length >= 2)
             for(var j=1; j < next.length; j++)    
-                this.mime_types[next[j]] = next[0];
+                router.mime_types[next[j]] = next[0];
     }
 
     //correction for some types
@@ -362,11 +367,10 @@ Ys.run = function(options){
     }); 
 
 
-	var ys_inst = this;
-    var server = Ys.server =http.createServer(function (req, res) {
+    var server = router.server = http.createServer(function (req, res) {
 
         try{
-            ys_inst.handle_request(req,res); 
+            router.handle_request(req,res); 
         }
         catch(e){
             var str = e.stack;
@@ -390,6 +394,22 @@ Ys.run = function(options){
 //--------------------------------------------------
 Ys.stop = function(){
     console.log("shutting down ...");
-    Ys.server.close();
+
+	var router = this;
+	if(router === Ys)
+		router = Ys.router;
+    router.server.close();
+}
+//--------------------------------------------------
+Ys.instance = function(){
+	
+	var router = new Router();
+    	
+	var func = function(){};
+	func.prototype = Ys;
+	var inst = new func();
+	var bound = router.bind(inst);
+	bound.__proto__ = Ys;
+	return bound;
 }
 //--------------------------------------------------
