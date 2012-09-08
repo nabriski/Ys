@@ -404,12 +404,13 @@ Ys.stop = function(){
 Ys.instance = function(){
 	
 	var router = new Router();
-    	
-	var func = function(){};
-	func.prototype = Ys;
-	var inst = new func();
-	var bound = router.bind(inst);
-	bound.__proto__ = Ys;
-	return bound;
+	router.id = Math.random();
+    var instance = function(url_regexp){
+		return Ys.call(router,url_regexp);
+	};
+	instance.run = Ys.run.bind(router);
+	instance.stop = Ys.stop.bind(router);
+	
+	return instance;
 }
 //--------------------------------------------------
