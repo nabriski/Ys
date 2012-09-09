@@ -7,43 +7,44 @@ module.exports = {
     test_init: function (test) {
         //config & run server
         
-        frontend = Ys.instance(),backend=Ys.instance();
-        frontend("^/$").get = function(req,res){
-            res.end("I am frontend");
+        a = Ys.instance(),b=Ys.instance();
+        a("^/$").get = function(req,res){
+            res.end("I am A");
         }
-        backend("^/$").get = function(req,res){
-            res.end("I am backend");
+
+        b("^/$").get = function(req,res){
+            res.end("I am B");
         }
         
                
-        frontend.run();
-        backend.run({port:8781});
+        a.run();
+        b.run({port:8781});
         test.done();
     },
     
-    test_get_frontend: function (test) {
+    test_get_a: function (test) {
 
         request('http://localhost:8780/', function (error, res, body) {
             test.equals(res.statusCode,200);
-            test.equals(body,"I am frontend");
+            test.equals(body,"I am A");
             test.done();
          })
          
     },
    
-    test_get_backend: function (test) {
+    test_get_b: function (test) {
 
         request('http://localhost:8781/', function (error, res, body) {
             test.equals(res.statusCode,200);
-            test.equals(body,"I am backend");
+            test.equals(body,"I am B");
             test.done();
          })
          
     }, 
 	test_cleanup: function (test) {
         // clean up
-        frontend.stop();
-        backend.stop();
+        a.stop();
+        b.stop();
         test.done();
     },
     
