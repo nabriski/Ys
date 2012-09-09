@@ -162,7 +162,28 @@ Router.prototype.stream_gzip = function(input,req,res,headers){
 }
 //--------------------------------------------------
 Router.prototype.handlers = [
-	
+
+    function proxy(route,req,res){
+		if(typeof(route.proxy) != "string") return false;
+
+        var proxy_address = route.proxy;
+        /*
+        req_parsed.host= req_parsed.hostname
+
+        var backend_req = http.request(req_parsed, function(backend_res) {
+            res.writeHead(backend_res.statusCode,backend_res.headers);
+            backend_res.on('data', function (chunk) {
+                res.write(chunk);
+            });
+
+            backend_res.on('end',function(){
+                res.end();
+            });
+        });
+
+        backend_req.end();         
+        */
+    },
 	function redirect(route,req,res){
 	
 		if(typeof(route.redirect) != "string") return false;
