@@ -9,9 +9,9 @@ var http = require('http'),
     zlib = require('zlib');
 //var querystring = require('querystring');
 //===================================================
-var Router = function(){};
-//===================================================
-Router.prototype.routes = [];
+var Router = function(){
+    this.routes = [];
+};
 //===================================================
 Router.prototype.mime_types = {}
 //===================================================
@@ -347,8 +347,10 @@ Ys.run = function(options){
         options.host= "localhost";
 
 	var router = this;
-	if(router === Ys)
+	if(router === Ys){
 		router = Ys.router;
+        //console.log("Ys router");
+    }
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
@@ -368,7 +370,6 @@ Ys.run = function(options){
 
 
     var server = router.server = http.createServer(function (req, res) {
-
         try{
             router.handle_request(req,res); 
         }
@@ -403,14 +404,12 @@ Ys.stop = function(){
 //--------------------------------------------------
 Ys.instance = function(){
 	
-	var router = new Router();
-	router.id = Math.random();
-    var instance = function(url_regexp){
+	var router = new Router(),inst = function(url_regexp){
 		return Ys.call(router,url_regexp);
 	};
-	instance.run = Ys.run.bind(router);
-	instance.stop = Ys.stop.bind(router);
-	
-	return instance;
+	inst.run = Ys.run.bind(router);
+	inst.stop = Ys.stop.bind(router);
+
+	return inst;
 }
 //--------------------------------------------------
