@@ -15,7 +15,7 @@ Ys.run({debug:true});
 ```
 In debug mode the server reloads itself on source changes. Do not use in production.
 
-### More Examples:
+### API:
 
 ##### Generic Response
 ```javascript
@@ -68,3 +68,26 @@ Ys("^/json$").get.json = function(req,res){
 }
 
 ```
+
+##### Proxy
+```javascript
+//proxy all requests to http://localhost:8080/
+Ys("^/.*$").proxy = "http://localhost:8080/";
+
+```
+##### Running Multiple Instances
+```javascript
+var a= Ys.instance(), b = Ys.instance();
+
+a("^/$").get.html = function(req,res){
+    res.end("<h1>Instance A</h1>");
+}
+a.run({port:8780});
+
+b("^/$").get.html = function(req,res){
+    res.end("<h1>Instance B</h1>");
+}
+b.run({port:8781});
+
+```
+

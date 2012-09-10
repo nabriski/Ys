@@ -166,11 +166,13 @@ Router.prototype.handlers = [
     function proxy(route,req,res){
 		if(typeof(route.proxy) != "string") return false;
 
-        var proxy_address = route.proxy;
-        /*
-        req_parsed.host= req_parsed.hostname
+        var req_parsed= url.parse(req.url);
+        var proxy_parsed = url.parse(route.proxy);
+        req_parsed.protocol = proxy_parsed.protocol;
+        req_parsed.hostname = proxy_parsed.hostname;
+        req_parsed.port = proxy_parsed.port;
 
-        var backend_req = http.request(req_parsed, function(backend_res) {
+        var proxy_req = http.request(req_parsed, function(backend_res) {
             res.writeHead(backend_res.statusCode,backend_res.headers);
             backend_res.on('data', function (chunk) {
                 res.write(chunk);
@@ -181,8 +183,9 @@ Router.prototype.handlers = [
             });
         });
 
-        backend_req.end();         
-        */
+        proxy_req.end();
+        return true;
+        
     },
 	function redirect(route,req,res){
 	
@@ -243,7 +246,8 @@ Router.prototype.handlers = [
 	},
 
 	function html(route,req,res){
-		if(typeof(route[req.method].json) != "function") return false;
+		
+        if(typeof(route[req.method].html) != "function"|| route[req.method].html_template ) return false;
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		route[req.method].html(req,res);
 		return true;
@@ -252,7 +256,7 @@ Router.prototype.handlers = [
 	
 	function html_template(route,req,res){
 
-		if(typeof(route[req.method].html_template) != "function") return false;
+		if(typeof(route[req.method].html) != "function" || !route[req.method].html_template) return false;
 
 		res.writeHead(200, {'Content-Type': 'text/html'});
 
@@ -289,7 +293,7 @@ Router.prototype.handle_request = function(req,res){
 
 
 	if(!route)
-		throw new Error(pathname +" >> No mapping for this path");
+		throw new Error(req.pathname +" >> No mapping for this path");
 
 
 	var ys_inst = this;
@@ -306,7 +310,8 @@ var Ys = exports.Ys = function(url_regexp) {
 	
 	var router = this;
    	if(router === global){
-		router = Ys.router = new Router();
+        if(!Ys.router) router = Ys.router = new Router();
+        else router = Ys.router;
 	}
 
     var matched = router.routes.filter(function(route){

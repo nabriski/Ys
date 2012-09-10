@@ -14,7 +14,7 @@ module.exports = {
             res.end("<h1>Hello World!</h1>");
         }
         
-		Ys("^/html/$").get = function(req,res){
+		Ys("^/html/$").get.html = function(req,res){
             res.end("<h1>Hello World!</h1>");
         }
 
@@ -34,7 +34,7 @@ module.exports = {
 		Ys("^/static.txt$").get.static = "/tmp/";
 
 		Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
-                
+               
         Ys.run();
         test.done();
     },
@@ -60,7 +60,7 @@ module.exports = {
     },
 	test_html: function (test) {
 
-        request('http://localhost:8780/raw_html/', function (error, res, body) {
+        request('http://localhost:8780/html/', function (error, res, body) {
             test.equals(res.statusCode,200);
             test.equals(res.headers['content-type'],"text/html");
             test.equals(body,"<h1>Hello World!</h1>");
