@@ -9,9 +9,9 @@ var Ys = require('../Ys').Ys;
 
 Ys("^/$").get = function(req,res){
     res.end("Hello World!");
-}
+};
 
-Ys.run({debug:true});
+Ys.run({debug:true};);
 ```
 In debug mode the server reloads itself on source changes. Do not use in production.
 
@@ -20,16 +20,16 @@ In debug mode the server reloads itself on source changes. Do not use in product
 #### Generic Response
 ```javascript
 Ys("^/$").get = function(req,res){
-    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.writeHead(200, {'Content-Type': 'text/html'};);
     res.end("<h1>Hello World!</h1>");
-}
+};
 ```
 
 #### JSON Response
 ```javascript
 Ys("^/json$").get.json = function(req,res){
-    res.returnObject({"message" : "Hello World"});
-}
+    res.returnObject({"message" : "Hello World"};);
+};
 ```
 
 #### HTML Templating
@@ -38,8 +38,8 @@ Ys("^/json$").get.json = function(req,res){
 // Where 'hello.html' is:
 // <h1>Hello <%= name %>!</h1>
 Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
-    res.returnObject({"name" : "Bob"});
-}
+    res.returnObject({"name" : "Bob"};);
+};
 ```
 
 #### Static Files
@@ -64,8 +64,8 @@ Ys("^(.*/[^\./]+)$").redirect = "$1/";//adds a trailing slash when missing
 Ys("^/json_alias/$").rewrite = "/json/";
 
 Ys("^/json$").get.json = function(req,res){
-    res.returnObject({"message" : "Hello World"});
-}
+    res.returnObject({"message" : "Hello World"};);
+};
 
 ```
 
@@ -82,13 +82,13 @@ var a= Ys.instance(), b = Ys.instance();
 
 a("^/$").get.html = function(req,res){
     res.end("<h1>Instance A</h1>");
-}
-a.run({port:8780});
+};
+a.run({port:8780};);
 
 b("^/$").get.html = function(req,res){
     res.end("<h1>Instance B</h1>");
-}
-b.run({port:8781});
+};
+b.run({port:8781};);
 
 ```
 
