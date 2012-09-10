@@ -1,7 +1,7 @@
 # Ys
 Node.js micro web framework.
 
-## Hello World:
+### Hello World:
 
 ```javascript
 
@@ -15,7 +15,7 @@ Ys.run({debug:true});
 ```
 In debug mode the server reloads itself on source changes. Do not use in production.
 
-## API:
+### API:
 
 #### Generic Response
 ```javascript
