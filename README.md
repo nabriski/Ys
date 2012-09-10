@@ -1,7 +1,7 @@
 # Ys
 Node.js micro web framework.
 
-### Hello World:
+## Hello World:
 
 ```javascript
 
@@ -15,9 +15,9 @@ Ys.run({debug:true});
 ```
 In debug mode the server reloads itself on source changes. Do not use in production.
 
-### API:
+## API:
 
-##### Generic Response
+#### Generic Response
 ```javascript
 Ys("^/$").get = function(req,res){
     res.writeHead(200, {'Content-Type': 'text/html'});
@@ -25,14 +25,14 @@ Ys("^/$").get = function(req,res){
 }
 ```
 
-##### JSON Response
+#### JSON Response
 ```javascript
 Ys("^/json$").get.json = function(req,res){
     res.returnObject({"message" : "Hello World"});
 }
 ```
 
-##### HTML Templating
+#### HTML Templating
 ```javascript
 // return html response using template 'hello.html' (supports ejs templates for now)
 // Where 'hello.html' is:
@@ -42,7 +42,7 @@ Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
 }
 ```
 
-##### Static Files
+#### Static Files
 ```javascript
 //return static files
 Ys("^/static/.*$").get.static = ".";
@@ -52,12 +52,12 @@ Ys("^/gzip/.*$").get.gzip = ".";
 
 ```
 
-##### Redirect
+#### Redirect
 ```javascript
-Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
+Ys("^(.*/[^\./]+)$").redirect = "$1/";//adds a trailing slash when missing
 ```
 
-##### Rewrite
+#### Rewrite
 ```javascript
 //rewrite /json_alias/ to /json/
 // must appear before the /json/ route
@@ -69,13 +69,14 @@ Ys("^/json$").get.json = function(req,res){
 
 ```
 
-##### Proxy
+#### Proxy
 ```javascript
 //proxy all requests to http://localhost:8080/
 Ys("^/.*$").proxy = "http://localhost:8080/";
 
 ```
-##### Running Multiple Instances
+
+#### Running Multiple Instances
 ```javascript
 var a= Ys.instance(), b = Ys.instance();
 
