@@ -118,8 +118,6 @@ Router.prototype._html_template = function(parent){
 	};
 }
 //--------------------------------------------------
-exports.client = require('./client');
-//--------------------------------------------------
 Router.prototype.stream_gzip = function(input,req,res,headers){
        
         var acceptEncoding = req.headers['accept-encoding'];
@@ -328,7 +326,9 @@ var Ys = exports.Ys = function(url_regexp) {
 
 }
 //--------------------------------------------------
-var run_debug_parent = function(options){
+exports.client = require('./client');
+//--------------------------------------------------
+Ys.run_debug_parent = function(options){
 
     var dir = path.dirname(module.parent.filename);
     var module_file = module.parent.filename;
@@ -341,6 +341,10 @@ var run_debug_parent = function(options){
 	};
 
     fork_child();
+    /*process.on('exit', function () {
+        child.on('exit',function(){});
+        child.kill();
+    });*/
 
     var tid = null;
     fs.watch(dir, function(event,filename){
@@ -361,8 +365,10 @@ Ys.run = function(options){
 	if(!options)
 	    options = {};
 
-    if(options.debug && !process.env.is_child){
-        run_debug_parent(options);
+    if(options.debug && !process.env.is_child && !Ys.is_in_debug){
+        Ys.is_in_debug = true;//so other instances in the same process don't get funny
+        Ys.run_debug_parent(options);
+
         return;
     }
 
@@ -439,3 +445,4 @@ Ys.instance = function(){
 	return inst;
 }
 //--------------------------------------------------
+
