@@ -341,10 +341,11 @@ Ys.run_debug_parent = function(options){
 	};
 
     fork_child();
-    /*process.on('exit', function () {
-        child.on('exit',function(){});
+    process.on("SIGTERM",function(){
+        child.removeListener('exit', fork_child);
         child.kill();
-    });*/
+        process.exit();
+    });
 
     var tid = null;
     fs.watch(dir, function(event,filename){
