@@ -92,7 +92,7 @@ module.exports = {
 
 	test_rewrite: function (test) {
 
-        request('http://localhost:8780/json', function (error, res, body) {
+        request('http://localhost:8780/json_alias/', function (error, res, body) {
             test.equals(res.statusCode,200);
             test.equals(res.headers['content-type'],"application/json");
             test.equals(JSON.parse(body)["message"],"Hello World");

@@ -193,6 +193,7 @@ Router.prototype.handlers = [
 		var statusCode = 301;
 		
 		if(req.method == "post") statusCode = 307;
+
 		res.writeHead(statusCode,{"Location":redirect_to});
 		res.end();
         return true;
@@ -202,7 +203,8 @@ Router.prototype.handlers = [
 		if(typeof(route.rewrite) != "string") return false;
 
         req.pathname = route.rewrite.replace("$1",req.$1);
-		return false;//so we continue processing the request with the re-written pathname!
+        this.handle_request(req,res);
+		return true;//inverse recusrion above will handle the request.
 	},
 
 	function gzip(route,req,res){
@@ -214,7 +216,7 @@ Router.prototype.handlers = [
 
 	function static(route,req,res){
 		if(typeof(route[req.method].static) != "string") return false;
-		var base_dir = route[req.method].static; 
+		var base_dir = route[req.method].static;
 		this.send_static(base_dir,req.pathname,req,res);
 		return true;
 	},
@@ -273,7 +275,7 @@ Router.prototype.handlers = [
 //--------------------------------------------------
 Router.prototype.handle_request = function(req,res){
         
-    req.pathname = url.parse(req.url).pathname;
+    req.pathname = req.pathname || url.parse(req.url).pathname;//in case there is already a pathname like in rewrite recursion
 	req.method = req.method.toLowerCase();
 
 	var route = null;
@@ -288,7 +290,6 @@ Router.prototype.handle_request = function(req,res){
 		}
 		return false;	
 	 });
-
 
 	if(!route)
 		throw new Error(req.pathname +" >> No mapping for this path");
