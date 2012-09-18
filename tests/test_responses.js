@@ -17,6 +17,10 @@ module.exports = {
 		Ys("^/html/$").get.html = function(req,res){
             res.end("<h1>Hello World!</h1>");
         }
+		
+        Ys("^/html/$").post.html = function(req,res){
+            res.end("<h1>Posted!</h1>");
+        }
 
         Ys("^/json_alias/$").rewrite = "/json/";
 
@@ -26,9 +30,9 @@ module.exports = {
 
 
 		fs.writeFileSync("/tmp/tmpl.html","<h1>Hello <%= name %>!</h1>");
-        Ys("^/html_template/$").get.html("/tmp/tmpl.html").args=function(req,res){
+        Ys("^/html_template/$").get.template = {"/tmp/tmpl.html":function(req,res){
 			res.returnObject({"name" : "Bob"});
-        }
+        }};
 
 		fs.writeFileSync("/tmp/static.txt","Hello World!");
 		Ys("^/static.txt$").get.static = "/tmp/";
@@ -69,6 +73,16 @@ module.exports = {
          
     },
 
+    test_post_html: function (test) {
+
+        request.post('http://localhost:8780/html/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"text/html");
+            test.equals(body,"<h1>Posted!</h1>");
+            test.done();
+         })
+         
+    },
     test_json: function (test) {
 
         request('http://localhost:8780/json/', function (error, res, body) {

@@ -37,9 +37,9 @@ Ys("^/json$").get.json = function(req,res){
 // return html response using template 'hello.html' (supports ejs templates for now)
 // Where 'hello.html' is:
 // <h1>Hello <%= name %>!</h1>
-Ys("^/hello_bob$").get.html('hello.html').args = function(req,res){
+Ys("^/hello_bob$").get.template = {'hello.html':function(req,res){
     res.returnObject({"name" : "Bob"};);
-};
+}};
 ```
 
 #### Static Files

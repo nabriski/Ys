@@ -100,23 +100,7 @@ Router.prototype.send_gzip = function(base_dir,file_path,req,res){
 	 
 }
 
-//===================================================
-Router.prototype._html_template = function(parent){
 
-	return function(template_path){
-		parent.html_template = function(object){
-		 	//load template
-			var res = this;
-		 	fs.readFile(template_path, function (err, data) {
-				if (err) throw err;
-				var compiled = ejs.compile(String(data));
-				res.end(compiled(object));
-		 	});	
-		};
-
-		return parent.html_template;
-	};
-}
 //--------------------------------------------------
 Router.prototype.stream_gzip = function(input,req,res,headers){
        
@@ -247,25 +231,31 @@ Router.prototype.handlers = [
 
 	function html(route,req,res){
 		
-        if(typeof(route[req.method].html) != "function"|| route[req.method].html_template ) return false;
+        if(typeof(route[req.method].html) != "function") return false;
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		route[req.method].html(req,res);
 		return true;
 		
 	},
 	
-	function html_template(route,req,res){
+	function template(route,req,res){
 
-		if(typeof(route[req.method].html) != "function" || !route[req.method].html_template) return false;
+		if(typeof(route[req.method].template) != "object") return false;
 
 		res.writeHead(200, {'Content-Type': 'text/html'});
+        var tmpl_path = Object.keys(route[req.method].template)[0];
 
 		res.returnObject = function(object){
-
-			route[req.method].html_template.call(this,object);
+            //load template
+            var res = this;
+            fs.readFile(tmpl_path, function (err, data) {
+                if (err) throw err;
+                var compiled = ejs.compile(String(data));
+                res.end(compiled(object));
+            });
 		};
 			
-		route[req.method].html_template.args(req,res);
+		route[req.method].template[tmpl_path](req,res);
 		return true;	
 	}
 
@@ -283,7 +273,9 @@ Router.prototype.handle_request = function(req,res){
 	this.routes.some(function(r){
         var regexp = RegExp(r.regexp);
 		var match = regexp.exec(req.pathname);
-        if(match){
+        //console.log(match);
+        //console.log(r[req.method]);
+        if(match && ("rewrite" in r || "redirect" in r || typeof(r[req.method])==="function" || Object.keys(r[req.method]).length > 0)){
 			route = r;
 			if(match.length > 1) req.$1 = match[1]; 
 			return true;
@@ -317,10 +309,10 @@ var Ys = exports.Ys = function(url_regexp) {
         return route["regexp"] === url_regexp;
 	});
 
+    
+
 	return matched[0] || (function(){
 		var route = {"regexp":url_regexp,"get":{},"post":{}};
-		route.get.html = router._html_template(route.get); 
-		route.post.html = router._html_template(route.post); 
     	this.routes.push(route);
     	return route;
 	}).call(router);
