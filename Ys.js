@@ -240,10 +240,10 @@ Router.prototype.handlers = [
 	
 	function template(route,req,res){
 
-		if(typeof(route[req.method].template) != "object") return false;
+		if(typeof(route[req.method].html) != "object") return false;
 
 		res.writeHead(200, {'Content-Type': 'text/html'});
-        var tmpl_path = Object.keys(route[req.method].template)[0];
+        var tmpl_path = Object.keys(route[req.method].html)[0];
 
 		res.returnObject = function(object){
             //load template
@@ -255,7 +255,7 @@ Router.prototype.handlers = [
             });
 		};
 			
-		route[req.method].template[tmpl_path](req,res);
+		route[req.method].html[tmpl_path](req,res);
 		return true;	
 	}
 
