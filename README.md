@@ -22,7 +22,7 @@ In debug mode the server reloads itself on source changes. Do not use in product
 Ys.run({
     host:"localhost",//default
     port:8780,//default
-    user:nabriski,//no default, will set the process's user to this user after binding to port
+    user:"nabriski",//no default, will set the process's user to this user after binding to port
     debug:false//default, if set to true server will restart if file including Ys has changed
 });
 ```
