@@ -24,7 +24,7 @@ Ys.run({
     port:8780,//default
     user:nabriski,//no default, will set the process's user to this user after binding to port
     debug:false//default, if set to true server will restart if file including Ys has changed
-    });
+});
 ```
 
 #### Generic Response
