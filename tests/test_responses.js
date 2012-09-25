@@ -29,7 +29,7 @@ module.exports = {
         } 
 
 
-		fs.writeFileSync("/tmp/tmpl.html","<h1>Hello <%= name %>!</h1>");
+		fs.writeFileSync("/tmp/tmpl.html","<h1>Hello {{name}}!</h1>");
         Ys("^/html_template/$").get.html = {"/tmp/tmpl.html":function(req,res){
 			res.returnObject({"name" : "Bob"});
         }};

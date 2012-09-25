@@ -23,6 +23,7 @@ Ys.run({
     host:"localhost",//default
     port:8780,//default
     user:"nabriski",//no default, will set the process's user to this user after binding to port
+    template_engine:"mustache"//default, but if you don't use templating you don't need it installed.
     debug:false//default, if set to true server will restart if file including Ys has changed
 });
 ```
@@ -44,9 +45,9 @@ Ys("^/json$").get.json = function(req,res){
 
 #### HTML Templating
 ```javascript
-// return html response using template 'hello.html' (supports ejs templates for now)
+// return html response using template 'hello.html' (default template engine is 'mustache.js' but any template engine with a 'compile' method can be define)
 // Where 'hello.html' is:
-// <h1>Hello <%= name %>!</h1>
+// <h1>Hello {{name}}!</h1>
 Ys("^/hello_bob$").get.html = {'hello.html':function(req,res){
     res.returnObject({"name" : "Bob"};);
 }};

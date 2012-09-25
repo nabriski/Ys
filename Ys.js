@@ -1,7 +1,6 @@
 var http = require('http'),
     url = require('url'),
     fs = require('fs'),
-    ejs = require('ejs'),
     path = require('path'),
     exec = require('child_process').exec,
     fork = require('child_process').fork,
@@ -245,12 +244,13 @@ Router.prototype.handlers = [
 		res.writeHead(200, {'Content-Type': 'text/html'});
         var tmpl_path = Object.keys(route[req.method].html)[0];
 
+        var router = this;
 		res.returnObject = function(object){
             //load template
             var res = this;
             fs.readFile(tmpl_path, function (err, data) {
                 if (err) throw err;
-                var compiled = ejs.compile(String(data));
+                var compiled = require(router.tmpl_engine).compile(String(data));
                 res.end(compiled(object));
             });
 		};
@@ -372,11 +372,16 @@ Ys.run = function(options){
     if(!options.host)
         options.host= "localhost";
 
+    if(!options.template_engine)
+        options.template_engine = "mustache";
+
 	var router = this;
 	if(router === Ys){
 		router = Ys.router;
         //console.log("Ys router");
     }
+
+    router.tmpl_engine = options.template_engine;
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
