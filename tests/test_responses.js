@@ -34,12 +34,20 @@ module.exports = {
 			res.returnObject({"name" : "Bob"});
         }};
 
+        fs.writeFileSync("/tmp/tmpl2.html","<h1>Hello {{>name}}!</h1>");
+        fs.writeFileSync("/tmp/name.mustache","Koko");
+        Ys("^/html_template2/$").get.html = {"/tmp/tmpl2.html":function(req,res){
+			res.returnObject({});
+        }};
+
 		fs.writeFileSync("/tmp/static.txt","Hello World!");
 		Ys("^/static.txt$").get.static = "/tmp/";
 
 		Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
                
-        Ys.run();
+        Ys.run({partials:{
+            path:"/tmp"
+        }});
         test.done();
     },
     
@@ -126,6 +134,16 @@ module.exports = {
          
     },
 
+    test_html_template_with_partial: function (test) {
+
+        request('http://localhost:8780/html_template2/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"text/html");
+            test.equals(body,"<h1>Hello Koko!</h1>");
+            test.done();
+         })
+         
+    },
 	test_static: function (test) {
 
         request('http://localhost:8780/static.txt', function (error, res, body) {
@@ -140,6 +158,8 @@ module.exports = {
         // clean up
         Ys.stop();
 		fs.unlinkSync("/tmp/tmpl.html");
+		fs.unlinkSync("/tmp/tmpl2.html");
+		fs.unlinkSync("/tmp/name.mustache");
 		fs.unlinkSync("/tmp/static.txt");
         test.done();
     },

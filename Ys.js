@@ -142,6 +142,44 @@ Router.prototype.stream_gzip = function(input,req,res,headers){
 
 }
 //--------------------------------------------------
+Router.prototype.getPartials = function(tmpl_txt,callback){
+    var engine = require(this.tmpl_engine);
+    if(typeof(engine["parse"]) !== "function"){
+            callback(null);
+            return;
+    }
+
+    var tokens = engine.parse(tmpl_txt).filter(function(token){
+        return token[0] === ">";
+    });
+
+   var partials = {};
+   var tokens_processed = "0";
+
+   if(tokens.length===0){
+        callback(partials);
+        return;
+   }
+
+   tokens.forEach(function(token){
+        var file_path = path.join(path.resolve(this.partials_info.path),token[1]+"."+this.partials_info.ext);
+
+        if(partials[token[1]]){
+            tokens_processed++;
+            return;
+        }
+
+        fs.readFile(file_path,"utf-8",function (err, data) {
+            if (err) throw err;
+           
+            partials[token[1]] = data;
+            tokens_processed++;
+            if(tokens_processed === tokens.length)
+                callback(partials);
+        });
+   },this);
+};
+//--------------------------------------------------
 Router.prototype.handlers = [
 
     function proxy(route,req,res){
@@ -248,10 +286,12 @@ Router.prototype.handlers = [
 		res.returnObject = function(object){
             //load template
             var res = this;
-            fs.readFile(tmpl_path, function (err, data) {
+            fs.readFile(tmpl_path, "utf-8",function (err, data) {
                 if (err) throw err;
-                var compiled = require(router.tmpl_engine).compile(String(data));
-                res.end(compiled(object));
+                var compiled = require(router.tmpl_engine).compile(data);
+                router.getPartials(data,function(partials){
+                    res.end(compiled(object,partials));
+                });
             });
 		};
 			
@@ -356,8 +396,23 @@ Ys.run_debug_parent = function(options){
 //--------------------------------------------------
 Ys.run = function(options){
 
+    var default_options = {
+        host:"localhost",
+        port:8780,
+        template_engine : "mustache",    
+        partials : {"path":".","ext":"mustache"}
+    }
+
 	if(!options)
 	    options = {};
+
+    Object.keys(default_options).forEach(function(opt){
+        if(typeof(options[opt])==="undefined") options[opt] = default_options[opt];
+    });
+
+    Object.keys(default_options.partials).forEach(function(opt){
+        if(typeof(options.partials[opt])==="undefined") options.partials[opt] = default_options.partials[opt];
+    });
 
     if(options.debug && !process.env.is_child && !Ys.is_in_debug){
         Ys.is_in_debug = true;//so other instances in the same process don't get funny
@@ -366,15 +421,6 @@ Ys.run = function(options){
         return;
     }
 
-    if(!options.port)
-        options.port = 8780;
-
-    if(!options.host)
-        options.host= "localhost";
-
-    if(!options.template_engine)
-        options.template_engine = "mustache";
-
 	var router = this;
 	if(router === Ys){
 		router = Ys.router;
@@ -382,6 +428,7 @@ Ys.run = function(options){
     }
 
     router.tmpl_engine = options.template_engine;
+    router.partials_info = options.partials;
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
