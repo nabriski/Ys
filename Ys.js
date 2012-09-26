@@ -162,20 +162,23 @@ Router.prototype.getPartials = function(tmpl_txt,callback){
    }
 
    tokens.forEach(function(token){
-        var file_path = path.join(path.resolve(this.partials_info.path),token[1]+"."+this.partials_info.ext);
 
         if(partials[token[1]]){
             tokens_processed++;
             return;
         }
-
+        
+        var file_path = path.join(path.resolve(this.partials_info.path),token[1]+"."+this.partials_info.ext);
+        var router = this;
         fs.readFile(file_path,"utf-8",function (err, data) {
             if (err) throw err;
-           
+            
             partials[token[1]] = data;
-            tokens_processed++;
-            if(tokens_processed === tokens.length)
-                callback(partials);
+            router.getPartials(data,function(nested_partials){
+                for(np in nested_partials) if(!partials[np]) partials[np] = nested_partials[np];
+                tokens_processed++;
+                if(tokens_processed === tokens.length) callback(partials);
+            }); 
         });
    },this);
 };
