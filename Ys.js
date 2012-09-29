@@ -283,8 +283,9 @@ Router.prototype.handlers = [
 		if(typeof(route[req.method].html) != "object") return false;
 
 		res.writeHead(200, {'Content-Type': 'text/html'});
-        var tmpl_path = Object.keys(route[req.method].html)[0];
 
+        var tmpl_path = Object.keys(route[req.method].html)[0].replace("$1",req.$1);
+        var tmpl_func = route[req.method].html[Object.keys(route[req.method].html)[0]] 
         var router = this;
 		res.returnObject = function(object){
             //load template
@@ -298,7 +299,7 @@ Router.prototype.handlers = [
             });
 		};
 			
-		route[req.method].html[tmpl_path](req,res);
+		tmpl_func(req,res);
 		return true;	
 	}
 
