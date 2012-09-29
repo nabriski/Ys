@@ -23,7 +23,11 @@ Ys.run({
     host:"localhost",//default
     port:8780,//default
     user:"nabriski",//no default, will set the process's user to this user after binding to port
-    template_engine:"mustache"//default, but if you don't use templating you don't need it installed.
+    template_engine:"mustache",//default, but if you don't use templating you don't need it installed.
+    partials : { // mutstache specific for partials support
+                "path":".",//default - path to look for partial files
+                "ext":"mustache"//extension of partial files
+    },
     debug:false//default, if set to true server will restart if file including Ys has changed
 });
 ```
