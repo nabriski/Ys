@@ -108,3 +108,16 @@ b.run({port:8781};);
 
 ```
 
+#### A/B Testing (wip)
+```
+For every 2 requests 
+
+$("^/$").AB.A.get = function(req,res){
+            
+};
+
+$("^/$").AB.B.get = function(req,res){
+            
+};
+
+```

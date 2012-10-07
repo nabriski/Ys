@@ -12,7 +12,7 @@ var Router = function(){
     this.routes = [];
 };
 //===================================================
-Router.prototype.mime_types = {}
+Router.prototype.mime_types = {};
 //===================================================
 Router.prototype.send_stream = function(fs_path,req,res,headers) {
        
@@ -30,17 +30,17 @@ Router.prototype.send_stream = function(fs_path,req,res,headers) {
             
            var flags = {};
            //console.log(req.headers);
-           range = req.headers['range'];
+           var range = req.headers.range;
             
            if(range){
                 var match = range.match(/^bytes\s*=\s*(\d+)-(\d*)/);
                 if(match){
-                    var start = parseInt(match[1]);
-                    var end = match[2].length > 0 ? parseInt(match[2]) : parseInt(size) -1;
+                    var start = parseInt(match[1],10);
+                    var end = match[2].length > 0 ? parseInt(match[2],10) : parseInt(size,10) -1;
                     headers["Content-Range"] =  'bytes %start-%end/%length'.replace("%start",start).replace("%end",end).replace("%length",size);
                     res.writeHead(206,headers);
-                    flags["start"] = start;
-                    flags["end"] = end;
+                    flags.start = start;
+                    flags.end = end;
                 }
                 else{
                     res.writeHead(416,headers);
@@ -59,9 +59,8 @@ Router.prototype.send_stream = function(fs_path,req,res,headers) {
 Router.prototype.send_ogg= function(path,req,res,headers,flags){
 
 	var child = exec("ogginfo %s | grep 'Playback length'".replace("%s",path),
-		  function (error, stdout, stderr) {
-			  if(error)
-					throw error;
+        function (error, stdout, stderr) {
+            if(error) throw error;
 				
 			var lens = stdout.trim().split(":");
 			var MINUTES = 1, SECONDS = 2;
@@ -69,7 +68,7 @@ Router.prototype.send_ogg= function(path,req,res,headers,flags){
 			headers['X-Content-Duration'] = String(duration);
 			send_stream(path,req,res,headers);
 	}); 
-}
+};
 //===================================================
 Router.prototype.send_static = function(base_dir,file_path,req,res){
 
@@ -85,7 +84,7 @@ Router.prototype.send_static = function(base_dir,file_path,req,res){
 	}
         
 	this.send_stream(fs_path,req,res,headers);
-}
+};
 //===================================================
 Router.prototype.send_gzip = function(base_dir,file_path,req,res){
 
@@ -97,9 +96,7 @@ Router.prototype.send_gzip = function(base_dir,file_path,req,res){
 	var raw = fs.createReadStream(fs_path);
 	this.stream_gzip(raw,req,res,headers);
 	 
-}
-
-
+};
 //--------------------------------------------------
 Router.prototype.stream_gzip = function(input,req,res,headers){
        
@@ -122,29 +119,26 @@ Router.prototype.stream_gzip = function(input,req,res,headers){
        res.writeHead(200,headers);
 
        if(typeof(input.pipe) === "function"){
-			   if(compression_stream)
-					stream = input.pipe(compression_stream);
-			   else
-					stream = input;
+           if(compression_stream) stream = input.pipe(compression_stream);
+           else stream = input;
 
-			   stream.pipe(res);
-			   return;
+           stream.pipe(res);
+           return;
        }
       
        if(compression_stream){
-	    compression_stream.pipe(res);
-	    compression_stream.write(input);
-	    compression_stream.end();
-	    return;
+            compression_stream.pipe(res);
+            compression_stream.write(input);
+            compression_stream.end();
+            return;
        }
 
        res.end(input);
-
-}
+};
 //--------------------------------------------------
 Router.prototype.getPartials = function(tmpl_txt,callback){
     var engine = require(this.tmpl_engine);
-    if(typeof(engine["parse"]) !== "function"){
+    if(typeof(engine.parse) !== "function"){
             callback(null);
             return;
     }
@@ -175,7 +169,7 @@ Router.prototype.getPartials = function(tmpl_txt,callback){
             
             partials[token[1]] = data;
             router.getPartials(data,function(nested_partials){
-                for(np in nested_partials) if(!partials[np]) partials[np] = nested_partials[np];
+                for(var np in nested_partials) if(!partials[np]) partials[np] = nested_partials[np];
                 tokens_processed++;
                 if(tokens_processed === tokens.length) callback(partials);
             }); 
@@ -213,7 +207,7 @@ Router.prototype.handlers = [
 	
 		if(typeof(route.redirect) != "string") return false;
         
-     	redirect_to = route["redirect"].replace("$1",req.$1);
+        redirect_to = route.redirect.replace("$1",req.$1);
 		var statusCode = 301;
 		
 		if(req.method == "post") statusCode = 307;
