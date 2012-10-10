@@ -1,4 +1,11 @@
 { 
   "name" : "Ys",
-  "main" : "./Ys.js" 
+  "main" : "./Ys.js",
+  "author": "Itamar Nabriski <itamar@clickido.com>",
+  "license": "MIT",
+  "version": "0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nabriski/Ys.git"
+  }
 }
