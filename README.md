@@ -47,7 +47,7 @@ Ys("^/json$").get.json = function(req,res){
 };
 ```
 
-#### HTML Templating
+#### Templating
 ```javascript
 // return html response using template 'hello.html' 
 // (default template engine is 'mustache.js' but any template engine with a 'compile' method can be defined)
