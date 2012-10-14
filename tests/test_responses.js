@@ -30,20 +30,20 @@ module.exports = {
 
 
 		fs.writeFileSync("/tmp/tmpl.html","<h1>Hello {{name}}!</h1>");
-        Ys("^/html_template/$").get.html = {"/tmp/tmpl.html":function(req,res){
+        Ys("^/html_template/$").get.template = {"/tmp/tmpl.html":function(req,res){
 			res.returnObject({"name" : "Bob"});
         }};
 
         fs.writeFileSync("/tmp/tmpl2.html","<h1>Hello {{>name}}!</h1>");
         fs.writeFileSync("/tmp/name.mustache","Koko");
-        Ys("^/html_template2/$").get.html = {"/tmp/tmpl2.html":function(req,res){
+        Ys("^/html_template2/$").get.template = {"/tmp/tmpl2.html":function(req,res){
 			res.returnObject({});
         }};
 
         fs.writeFileSync("/tmp/tmpl3.html","<h1>Hello {{>name2}}!</h1>");
         fs.writeFileSync("/tmp/name2.mustache","{{>title}} Koko");
         fs.writeFileSync("/tmp/title.mustache","Mr.");
-        Ys("^/html_template3/$").get.html = {"/tmp/tmpl3.html":function(req,res){
+        Ys("^/html_template3/$").get.template = {"/tmp/tmpl3.html":function(req,res){
 			res.returnObject({});
         }};
 		fs.writeFileSync("/tmp/static.txt","Hello World!");

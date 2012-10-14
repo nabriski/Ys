@@ -53,7 +53,7 @@ Ys("^/json$").get.json = function(req,res){
 // (default template engine is 'mustache.js' but any template engine with a 'compile' method can be defined)
 // Where 'hello.html' is:
 // <h1>Hello {{name}}!</h1>
-Ys("^/hello_bob$").get.html = {'hello.html':function(req,res){
+Ys("^/hello_bob$").get.template = {'hello.html':function(req,res){
     res.returnObject({"name" : "Bob"};);
 }};
 ```

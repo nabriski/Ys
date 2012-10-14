@@ -274,16 +274,18 @@ Router.prototype.handlers = [
 	
 	function template(route,req,res){
 
-		if(typeof(route[req.method].html) != "object") return false;
+		if(typeof(route[req.method].template) != "object") return false;
 
-		res.writeHead(200, {'Content-Type': 'text/html'});
+        var tmpl_path = Object.keys(route[req.method].template)[0].replace("$1",req.$1);
+        var ext = path.extname(tmpl_path).substring(1),
+		mime_type = this.mime_types[ext]
+		if(mime_type) res.writeHead(200, {'Content-Type': mime_type});
 
-        var tmpl_path = Object.keys(route[req.method].html)[0].replace("$1",req.$1);
-        var tmpl_func = route[req.method].html[Object.keys(route[req.method].html)[0]] 
+        var tmpl_func = route[req.method].template[Object.keys(route[req.method].template)[0]] 
         var router = this;
 		res.returnObject = function(object){
             //load template
-            var res = this;
+            //var res = this;
             fs.readFile(tmpl_path, "utf-8",function (err, data) {
                 if (err) throw err;
                 var compiled = require(router.tmpl_engine).compile(data);
