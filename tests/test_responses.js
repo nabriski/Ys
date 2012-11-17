@@ -8,7 +8,11 @@ module.exports = {
         Ys("^/$").get = function(req,res){
             res.end("Hello World!");
         }
-        
+
+        Ys("^/(Good)(Bad)(Ugly)/$").get = function(req,res){
+            res.end("The "+req.$1+" the "+req.$2+" and the "+req.$3+".");
+        }
+
         Ys("^/raw_html/$").get = function(req,res){
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end("<h1>Hello World!</h1>");
@@ -58,14 +62,21 @@ module.exports = {
     },
     
     test_get: function (test) {
-
         request('http://localhost:8780/', function (error, res, body) {
             test.equals(res.statusCode,200);
             test.equals(body,"Hello World!");
             test.done();
          })
-         
     },
+
+    test_get_matches: function (test) {
+        request('http://localhost:8780/GoodBadUgly/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(body,"The Good the Bad and the Ugly.");
+            test.done();
+         })
+    },
+
     test_raw_html: function (test) {
 
         request('http://localhost:8780/raw_html/', function (error, res, body) {
