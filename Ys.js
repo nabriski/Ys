@@ -207,7 +207,13 @@ Router.prototype.handlers = [
 	
 		if(typeof(route.redirect) != "string") return false;
         
-        redirect_to = route.redirect.replace("$1",req.$1);
+        var redirect_to = route.redirect;
+        var i = 1;
+        while(req["$"+String(i)]){
+            redirect_to = redirect_to.replace("$"+String(i),req["$"+String(i)]);
+            i++;
+        }
+
 		var statusCode = 301;
 		
 		if(req.method == "post") statusCode = 307;
@@ -220,7 +226,13 @@ Router.prototype.handlers = [
 	function rewrite(route,req,res){
 		if(typeof(route.rewrite) != "string") return false;
 
-        req.pathname = route.rewrite.replace("$1",req.$1);
+        req.pathname = route.rewrite;
+
+        var i = 1;
+        while(req["$"+String(i)]){
+            req.pathname = req.pathname.replace("$"+String(i),req["$"+String(i)]);
+            i++;
+        }
         this.handle_request(req,res);
 		return true;//inverse recusrion above will handle the request.
 	},

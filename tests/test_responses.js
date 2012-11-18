@@ -27,6 +27,8 @@ module.exports = {
         }
 
         Ys("^/json_alias/$").rewrite = "/json/";
+        
+        Ys("^/(Ugly)(Bad)(Good)/$").rewrite = "/$3$2$1/";
 
         Ys("^/json/$").get.json = function(req,res){
             res.returnObject({"message" : "Hello World"});
@@ -54,6 +56,8 @@ module.exports = {
 		Ys("^/static.txt$").get.static = "/tmp/";
 
 		Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
+        
+        Ys("^/(Ugly)(Bad)(Good)Again/$").redirect = "/$3$2$1/";
                
         Ys.run({partials:{
             path:"/tmp"
@@ -138,6 +142,22 @@ module.exports = {
             test.done();
          })
          
+    },
+
+    test_rewrite_with_matches: function (test) {
+        request('http://localhost:8780/UglyBadGood/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(body,"The Good the Bad and the Ugly.");
+            test.done();
+         })
+    },
+
+    test_redirect_with_matches: function (test) {
+        request('http://localhost:8780/UglyBadGoodAgain/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(body,"The Good the Bad and the Ugly.");
+            test.done();
+         })
     },
 
 	test_html_template: function (test) {
