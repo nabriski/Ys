@@ -26,6 +26,10 @@ module.exports = {
             res.end("<h1>Posted!</h1>");
         }
 
+        Ys("^/echo/([\\w\\-]+)/$").get = function(req,res){
+            res.end(req.$1);
+        }
+
         Ys("^/json_alias/$").rewrite = "/json/";
         
         Ys("^/(Ugly)(Bad)(Good)/$").rewrite = "/$3$2$1/";
@@ -112,6 +116,18 @@ module.exports = {
          })
          
     },
+
+    test_match: function (test) {
+
+        request('http://localhost:8780/echo/koko-jumbo/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"text/html");
+            test.equals(body,"koko-jumbo");
+            test.done();
+         })
+         
+    },
+
     test_json: function (test) {
 
         request('http://localhost:8780/json/', function (error, res, body) {
