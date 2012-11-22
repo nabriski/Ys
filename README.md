@@ -57,6 +57,12 @@ Ys("^/hello_bob$").get.template = {'hello.html':function(req,res){
     res.returnObject({"name" : "Bob"};);
 }};
 ```
+#### Echo Server
+```javascript
+Ys("^/hello/(\\w+)/$").get = function(req,res){
+    res.end("Hello "+req.$1+"!");
+};
+```
 
 #### Static Files
 ```javascript

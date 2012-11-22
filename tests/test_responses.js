@@ -26,9 +26,9 @@ module.exports = {
             res.end("<h1>Posted!</h1>");
         }
 
-        Ys("^/echo/([\\w\\-]+)/$").get = function(req,res){
-            res.end(req.$1);
-        }
+        Ys("^/hello/(\\w+)/$").get = function(req,res){
+            res.end("Hello "+req.$1+"!");
+        };
 
         Ys("^/json_alias/$").rewrite = "/json/";
         
@@ -119,10 +119,10 @@ module.exports = {
 
     test_match: function (test) {
 
-        request('http://localhost:8780/echo/koko-jumbo/', function (error, res, body) {
+        request('http://localhost:8780/hello/Megan/', function (error, res, body) {
             test.equals(res.statusCode,200);
             test.equals(res.headers['content-type'],"text/html");
-            test.equals(body,"koko-jumbo");
+            test.equals(body,"Hello Megan!");
             test.done();
          })
          
