@@ -1,9 +1,9 @@
 { 
-  "name" : "Ys",
+  "name" : "ys",
   "main" : "./Ys.js",
   "author": "Itamar Nabriski <itamar.nabriski@gmail.com>",
   "license": "MIT",
-  "version": "0.1",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nabriski/Ys.git"

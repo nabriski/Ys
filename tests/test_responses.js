@@ -9,6 +9,7 @@ module.exports = {
             res.end("Hello World!");
         }
 
+
         Ys("^/(Good)(Bad)(Ugly)/$").get = function(req,res){
             res.end("The "+req.$1+" the "+req.$2+" and the "+req.$3+".");
         }

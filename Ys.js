@@ -209,7 +209,7 @@ Router.prototype.handlers = [
         
         var redirect_to = route.redirect;
         var i = 1;
-        while(req["$"+String(i)]){
+        while(typeof(req["$"+String(i)])==="string"){
             redirect_to = redirect_to.replace("$"+String(i),req["$"+String(i)]);
             i++;
         }
@@ -229,7 +229,7 @@ Router.prototype.handlers = [
         req.pathname = route.rewrite;
 
         var i = 1;
-        while(req["$"+String(i)]){
+        while(typeof(req["$"+String(i)])==="string"){
             req.pathname = req.pathname.replace("$"+String(i),req["$"+String(i)]);
             i++;
         }
@@ -435,7 +435,6 @@ Ys.run = function(options){
 	var router = this;
 	if(router === Ys){
 		router = Ys.router;
-        //console.log("Ys router");
     }
 
     router.tmpl_engine = options.template_engine;
