@@ -1,7 +1,7 @@
 { 
   "name" : "Ys",
   "main" : "./Ys.js",
-  "author": "Itamar Nabriski <itamar@clickido.com>",
+  "author": "Itamar Nabriski <itamar.nabriski@gmail.com>",
   "license": "MIT",
   "version": "0.1",
   "repository": {
