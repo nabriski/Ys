@@ -11,6 +11,11 @@ module.exports = {
         Ys("/index.html").get = function(req,res){
             res.end("Hello!");
         };
+
+        Ys("/index.html").post = function(req,res){
+            res.end("koko");
+        };
+ 
         Ys.run();
         callback();
     },
@@ -28,5 +33,13 @@ module.exports = {
             test.done();
          })
     },
+    test_post_bug: function (test) {
+        request.post('http://localhost:8780/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(body,"koko");
+            test.done();
+         })
+    },
+
     
 };
