@@ -411,7 +411,8 @@ Ys.run = function(options){
         host:"localhost",
         port:8780,
         template_engine : "mustache",    
-        partials : {"path":".","ext":"mustache"}
+        partials : {"path":".","ext":"mustache"},
+        on_init : null
     }
 
 	if(!options)
@@ -469,12 +470,13 @@ Ys.run = function(options){
 
     });
 
-    if(options.user){
-        server.once("listening",function(){
-            process.setuid(options.user);        
-            //process.setgid(user);        
-        });        
-    }
+    
+    server.once("listening",function(){
+        if(options.user) process.setuid(options.user);        
+        if(options.on_init) options.on_init();
+        //process.setgid(user);        
+    });        
+    
 
     server.listen(options.port,options.host);
 

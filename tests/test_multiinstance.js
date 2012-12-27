@@ -17,9 +17,12 @@ module.exports = {
         }
         
                
-        a.run();
-        b.run({port:8781});
-        test.done();
+        a.run({on_init:function(){
+            b.run({port:8781,on_init:function(){
+                test.done();
+            }});
+        
+        }});
     },
     
     test_get_a: function (test) {

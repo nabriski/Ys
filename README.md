@@ -28,7 +28,8 @@ Ys.run({
                 "path":".",//default - path to look for partial files
                 "ext":"mustache"//extension of partial files
     },
-    debug:false//default, if set to true server will restart if file including Ys has changed
+    debug:false,//default, if set to true server will restart if file including Ys has changed
+    on_init:null //default, optional callback to be called when Ys starts listening to requests
 });
 ```
 
