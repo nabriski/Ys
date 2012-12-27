@@ -1,7 +1,7 @@
 # Ys
 Node.js micro web framework.
 
-### Installation
+## Installation
 ```
 npm install ys
 ````
