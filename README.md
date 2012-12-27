@@ -1,6 +1,11 @@
 # Ys
 Node.js micro web framework.
 
+### Installation
+```
+npm install ys
+````
+
 ### Hello World:
 
 ```javascript
