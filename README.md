@@ -10,7 +10,7 @@ npm install ys
 
 ```javascript
 
-var Ys = require('../Ys').Ys;
+var Ys = require('ys').Ys;
 
 Ys("^/$").get = function(req,res){
     res.end("Hello World!");
