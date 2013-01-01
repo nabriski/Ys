@@ -17,8 +17,8 @@ module.exports = {
         }
         
                
-        a.run({on_init:function(){
-            b.run({port:8781,on_init:function(){
+        a.run({onInit:function(){
+            b.run({port:8781,onInit:function(){
                 test.done();
             }});
         

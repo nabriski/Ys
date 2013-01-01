@@ -412,7 +412,7 @@ Ys.run = function(options){
         port:8780,
         template_engine : "mustache",    
         partials : {"path":".","ext":"mustache"},
-        on_init : null
+        onInit : null
     }
 
 	if(!options)
@@ -473,7 +473,7 @@ Ys.run = function(options){
     
     server.once("listening",function(){
         if(options.user) process.setuid(options.user);        
-        if(options.on_init) options.on_init();
+        if(options.onInit) options.onInit();
         //process.setgid(user);        
     });        
     

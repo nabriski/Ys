@@ -1,7 +1,7 @@
 # Ys
 Node.js micro web framework.
 
-## Installation
+### Installation
 ```
 npm install ys
 ````
@@ -34,7 +34,7 @@ Ys.run({
                 "ext":"mustache"//extension of partial files
     },
     debug:false,//default, if set to true server will restart if file including Ys has changed
-    on_init:null //default, optional callback to be called when Ys starts listening to requests
+    onInit:null //default, optional callback to be called when Ys starts listening to requests
 });
 ```
 
