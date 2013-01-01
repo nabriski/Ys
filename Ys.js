@@ -325,7 +325,7 @@ Router.prototype.handle_request = function(req,res){
 	this.routes.some(function(r){
         var regexp = RegExp(r.regexp);
 		var match = regexp.exec(req.pathname);
-        if(match && ("rewrite" in r || "redirect" in r || typeof(r[req.method])==="function" || Object.keys(r[req.method]).length > 0)){
+        if(match && ("rewrite" in r || "redirect" in r || "proxy" in r || typeof(r[req.method])==="function" || Object.keys(r[req.method]).length > 0)){
 			route = r;
 			//if(match.length > 1) req.$1 = match[1]; 
             for(var i=0; i<match.length; i++) req["$"+String(i)] = match[i];

@@ -2,11 +2,11 @@ var fs = require('fs'),
     request = require('request');
 	Ys = require('../../Ys').Ys;
 
+        
 
 module.exports = {
     test_init: function (test) {
         //config & run server
-        
         frontend = Ys.instance(),backend=Ys.instance();
         frontend("^/.*$").proxy = "http://localhost:8781/";
 
@@ -15,9 +15,17 @@ module.exports = {
         }
         
                
-        frontend.run();
-        backend.run({port:8781});
-        test.done();
+        frontend.run({
+                onInit:function(){
+                    backend.run(
+                        {
+                            port:8781,
+                            onInit:function(){
+                                test.done();
+                        }   
+                    });
+                }
+        });
     },
     
     test_get_proxied: function (test) {
