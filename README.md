@@ -116,7 +116,7 @@ a.run({port:8780};);
 b("^/$").get.html = function(req,res){
     res.end("<h1>Instance B</h1>");
 };
-b.run({port:8781};);
+b.run({port:8781});
 
 ```
 
