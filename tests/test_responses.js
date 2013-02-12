@@ -52,8 +52,8 @@ module.exports = {
         }};
 
         fs.writeFileSync("/tmp/tmpl3.html","<h1>Hello {{>name2}}!</h1>");
-        fs.writeFileSync("/tmp/name2.mustache","{{>title}} Koko");
-        fs.writeFileSync("/tmp/title.mustache","Mr.");
+        fs.writeFileSync("/tmp/name2.mustache","{{>title2}} Koko");
+        fs.writeFileSync("/tmp/title2.mustache","Mr.");
         Ys("^/html_template3/$").get.template = {"/tmp/tmpl3.html":function(req,res){
 			res.returnObject({});
         }};

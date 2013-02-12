@@ -143,12 +143,28 @@ Router.prototype.getPartials = function(tmpl_txt,callback){
             return;
     }
 
-    var tokens = engine.parse(tmpl_txt).filter(function(token){
-        return token[0] === ">";
-    });
+    var extractPartials = function(tokens,arr){
+
+        if(!arr) arr = [];
+        tokens.forEach(function(token){
+
+            if(typeof(token) === "string" || typeof(token) === "number") return;
+
+            if (token[0] === ">"){
+                arr.push(token);
+                return;
+            }
+
+            extractPartials(token,arr);
+
+        }); 
+    },tokens=[];
+    
+    extractPartials(engine.parse(tmpl_txt),tokens);
+       
 
    var partials = {};
-   var tokens_processed = "0";
+   var tokens_processed = 0;
 
    if(tokens.length===0){
         callback(partials);
@@ -157,7 +173,7 @@ Router.prototype.getPartials = function(tmpl_txt,callback){
 
    tokens.forEach(function(token){
 
-        if(partials[token[1]]){
+        if(partials[token[1]]){//remove duplicates
             tokens_processed++;
             return;
         }
@@ -172,7 +188,7 @@ Router.prototype.getPartials = function(tmpl_txt,callback){
                 for(var np in nested_partials) if(!partials[np]) partials[np] = nested_partials[np];
                 tokens_processed++;
                 if(tokens_processed === tokens.length) callback(partials);
-            }); 
+            });
         });
    },this);
 };
