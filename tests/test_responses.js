@@ -57,6 +57,15 @@ module.exports = {
         Ys("^/html_template3/$").get.template = {"/tmp/tmpl3.html":function(req,res){
 			res.returnObject({});
         }};
+        
+        fs.writeFileSync("/tmp/tmpl4.html","<h1>Hello {{>name3}}!</h1>");
+        fs.writeFileSync("/tmp/name3.mustache","{{# show_title }}{{>title}}{{/show_title}} Koko");
+        fs.writeFileSync("/tmp/title.mustache","Mr.");
+        Ys("^/html_template4/$").get.template = {"/tmp/tmpl4.html":function(req,res){
+			res.returnObject({show_title:true});
+        }};
+
+
 		fs.writeFileSync("/tmp/static.txt","Hello World!");
 		Ys("^/static.txt$").get.static = "/tmp/";
 
@@ -209,6 +218,18 @@ module.exports = {
          })
          
     },
+
+    test_html_template_with_nested_partial_in_a_conditional: function (test) {
+
+        request('http://localhost:8780/html_template4/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"text/html");
+            test.equals(body,"<h1>Hello Mr. Koko!</h1>");
+            test.done();
+         })
+         
+    },
+
 	test_static: function (test) {
 
         request('http://localhost:8780/static.txt', function (error, res, body) {
