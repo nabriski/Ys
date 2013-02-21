@@ -24,9 +24,8 @@ Router.prototype.send_stream = function(fs_path,req,res,headers) {
                 return;
 
             }
-            var ins = util.inspect(stats);
-            var size = ins.match(/size:\s*(\d+)/)[1];
-            headers['Content-Length'] = size;
+          
+            headers['Content-Length'] = String(stats.size);
             
            var flags = {};
            //console.log(req.headers);
