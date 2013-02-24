@@ -270,7 +270,7 @@ Router.prototype.handlers = [
 	
 		if(typeof(route[req.method]) != "function") return false;
 
-		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.setHeader('Content-Type', 'text/html');
 
 		route[req.method](req,res);
 
@@ -281,7 +281,7 @@ Router.prototype.handlers = [
 	function json(route,req,res){
 		if(typeof(route[req.method].json) != "function") return false;
 		
-		res.writeHead(200, {'Content-Type': 'application/json'});
+		res.setHeader('Content-Type', 'application/json');
 		res.returnObject = function(object){
     		this.end(JSON.stringify(object));
 		};
@@ -293,7 +293,7 @@ Router.prototype.handlers = [
 	function html(route,req,res){
 		
         if(typeof(route[req.method].html) != "function") return false;
-		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.setHeader('Content-Type', 'text/html');
 		route[req.method].html(req,res);
 		return true;
 		
@@ -306,7 +306,7 @@ Router.prototype.handlers = [
         var tmpl_path = Object.keys(route[req.method].template)[0].replace("$1",req.$1);
         var ext = path.extname(tmpl_path).substring(1),
 		mime_type = this.mime_types[ext]
-		if(mime_type) res.writeHead(200, {'Content-Type': mime_type});
+		if(mime_type) res.setHeader('Content-Type', mime_type);
 
         var tmpl_func = route[req.method].template[Object.keys(route[req.method].template)[0]] 
         var router = this;
