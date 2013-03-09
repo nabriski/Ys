@@ -135,61 +135,26 @@ Router.prototype.stream_gzip = function(input,req,res,headers){
        res.end(input);
 };
 //--------------------------------------------------
-Router.prototype.getPartials = function(tmpl_txt,callback){
-    var engine = require(this.tmpl_engine);
-    if(typeof(engine.parse) !== "function"){
-            callback(null);
-            return;
-    }
-
-    var extractPartials = function(tokens,arr){
-
-        if(!arr) arr = [];
-        tokens.forEach(function(token){
-
-            if(typeof(token) === "string" || typeof(token) === "number") return;
-
-            if (token[0] === ">"){
-                arr.push(token);
-                return;
-            }
-
-            extractPartials(token,arr);
-
-        }); 
-    },tokens=[];
+Router.prototype.readPartials = function(dirPath){
     
-    extractPartials(engine.parse(tmpl_txt),tokens);
-       
+	var router = this;
+	dirPath = dirPath || router.partialsInfo.path;
 
-   var partials = {};
-   var tokens_processed = 0;
+	fs.readdirSync(dirPath).forEach(function(fileName){
+		var file = path.join([dirPath,fileName]), 
+			contents = null,
+			ext = router.partialsInfo.ext;
 
-   if(tokens.length===0){
-        callback(partials);
-        return;
-   }
+		console.log(file);
+		if(fs.statSync(file).isDirectory()) return router.readPartials(file);
+		
+		if(path.extname(file) !== ext) return;
 
-   tokens.forEach(function(token){
-
-        if(partials[token[1]]){//remove duplicates
-            tokens_processed++;
-            return;
-        }
-        
-        var file_path = path.join(path.resolve(this.partials_info.path),token[1]+"."+this.partials_info.ext);
-        var router = this;
-        fs.readFile(file_path,"utf-8",function (err, data) {
-            if (err) throw err;
-            
-            partials[token[1]] = data;
-            router.getPartials(data,function(nested_partials){
-                for(var np in nested_partials) if(!partials[np]) partials[np] = nested_partials[np];
-                tokens_processed++;
-                if(tokens_processed === tokens.length) callback(partials);
-            });
-        });
-   },this);
+		contents = fs.readFileSync(file,"utf-8");
+		tmplEngine.registerPartial(path.basename(file,ext),contents);
+		
+	});
+    
 };
 //--------------------------------------------------
 Router.prototype.handlers = [
@@ -315,10 +280,8 @@ Router.prototype.handlers = [
             //var res = this;
             fs.readFile(tmpl_path, "utf-8",function (err, data) {
                 if (err) throw err;
-                var compiled = require(router.tmpl_engine).compile(data);
-                router.getPartials(data,function(partials){
-                    res.end(compiled(object,partials));
-                });
+                var compiled = router.tmplEngine.compile(data);
+				res.end(compiled(object));
             });
 		};
 			
@@ -425,7 +388,7 @@ Ys.run = function(options){
     var default_options = {
         host:"localhost",
         port:8780,
-        template_engine : "mustache",    
+        template_engine : "handlebars",    
         partials : {"path":".","ext":"mustache"},
         onInit : null
     }
@@ -453,8 +416,9 @@ Ys.run = function(options){
 		router = Ys.router;
     }
 
-    router.tmpl_engine = options.template_engine;
-    router.partials_info = options.partials;
+    router.tmplEngine = require(options.template_engine);
+    router.partialsInfo = options.partials;
+	if(options.template_engine === "handlebars") router.readPartials();
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
