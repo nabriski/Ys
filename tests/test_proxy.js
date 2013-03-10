@@ -40,9 +40,11 @@ module.exports = {
   
     test_cleanup: function (test) {
         // clean up
-        frontend.stop();
-        backend.stop();
-        test.done();
+        frontend.stop({onShutdown:function(){
+            backend.stop({onShutdown: function(){
+                test.done();
+            }});
+        }});
     },
     
 };

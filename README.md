@@ -28,7 +28,7 @@ Ys.run({
     host:"localhost",//default
     port:8780,//default
     user:"nabriski",//no default, will set the process's user to this user after binding to port
-    template_engine:"mustache",//default, but if you don't use templating you don't need it installed.
+    template_engine:"handlebars",//default, but if you don't use templating you don't need it installed.
     partials : { // mutstache specific for partials support
                 "path":".",//default - path to look for partial files
                 "ext":"mustache"//extension of partial files
@@ -56,7 +56,7 @@ Ys("^/json$").get.json = function(req,res){
 #### Templating
 ```javascript
 // return html response using template 'hello.html' 
-// (default template engine is 'mustache.js' but any template engine with a 'compile' method can be defined)
+// (default template engine is 'handlebars.js' but any template engine with a 'compile' method can be defined)
 // Where 'hello.html' is:
 // <h1>Hello {{name}}!</h1>
 Ys("^/hello_bob$").get.template = {'hello.html':function(req,res){

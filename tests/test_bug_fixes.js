@@ -16,14 +16,16 @@ module.exports = {
             res.end("koko");
         };
  
-        Ys.run();
-        callback();
+        Ys.run({onInit:function(){
+            callback();
+        }});
     },
 
     tearDown: function (callback) {
         // clean up
-        Ys.stop();
-        callback();
+        Ys.stop({onShutdown:function(){
+            callback();
+        }});
     },
     
     test_rewrite_match_bug: function (test) {

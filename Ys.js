@@ -141,17 +141,16 @@ Router.prototype.readPartials = function(dirPath){
 	dirPath = dirPath || router.partialsInfo.path;
 
 	fs.readdirSync(dirPath).forEach(function(fileName){
-		var file = path.join([dirPath,fileName]), 
+		var file = path.join(dirPath,fileName), 
 			contents = null,
 			ext = router.partialsInfo.ext;
 
-		console.log(file);
-		if(fs.statSync(file).isDirectory()) return router.readPartials(file);
+		//if(fs.statSync(file).isDirectory()) return router.readPartials(file);
 		
-		if(path.extname(file) !== ext) return;
+		if(path.extname(file).replace(/^\./,'') !== ext) return;
 
 		contents = fs.readFileSync(file,"utf-8");
-		tmplEngine.registerPartial(path.basename(file,ext),contents);
+		router.tmplEngine.registerPartial(path.basename(file,ext).replace(/\.$/,''),contents);
 		
 	});
     
@@ -418,7 +417,10 @@ Ys.run = function(options){
 
     router.tmplEngine = require(options.template_engine);
     router.partialsInfo = options.partials;
-	if(options.template_engine === "handlebars") router.readPartials();
+	if(options.template_engine === "handlebars"){
+        console.log("loading partials ...");
+        router.readPartials();
+    }
 
     var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
     for(var i=0; i<mimes_raw.length; i++){
@@ -462,13 +464,14 @@ Ys.run = function(options){
     console.log('Server running at '+options.host+':'+options.port+'/');
 }
 //--------------------------------------------------
-Ys.stop = function(){
+Ys.stop = function(options){
     console.log("shutting down ...");
 
 	var router = this;
-	if(router === Ys)
-		router = Ys.router;
-    router.server.close();
+	if(router === Ys) router = Ys.router;
+
+    if(options && typeof(options.onShutdown) === "function") router.server.close(options.onShutdown);
+    else router.server.close();
 }
 //--------------------------------------------------
 Ys.instance = function(){
