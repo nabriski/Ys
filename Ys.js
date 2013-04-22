@@ -311,18 +311,21 @@ Router.prototype.handle_request = function(req,res){
 		return false;	
 	 });
 
-	if(!route)
-		throw new Error(req.pathname +" >> No mapping for this path");
-
+	if(!route){
+        res.writeHead(404, {'Content-Type': 'text/html'});
+        res.end(req.pathname +" >> No mapping for this path");
+    }
 
 	var ys_inst = this;
-	var request_handled = ys_inst.handlers.some(function(handler){
+	var request_handled = route && ys_inst.handlers.some(function(handler){
 		return handler.call(ys_inst,route,req,res);
 	});
 
         
-    if(!request_handled) 
-    	throw new Error(req.pathname +" >> No mapping for this path");
+    if(!request_handled){ 
+        res.writeHead(404, {'Content-Type': 'text/html'});
+        res.end(req.pathname +" >> No mapping for this path");
+    }
 }
 //--------------------------------------------------
 var Ys = exports.Ys = function(url_regexp) {

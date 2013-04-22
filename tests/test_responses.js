@@ -240,6 +240,15 @@ module.exports = {
          })
          
     },
+    test_404: function (test) {
+
+        request('http://localhost:8780/no-such-page/', function (error, res, body) {
+            test.equals(res.statusCode,404);
+            test.equals(res.headers['content-type'],"text/html");
+            test.done();
+         })
+         
+    },
 	test_cleanup: function (test) {
         // clean up
         Ys.stop();
