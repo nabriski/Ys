@@ -247,7 +247,7 @@ Router.prototype.handlers = [
 		
 		res.setHeader('Content-Type', 'application/json');
 		res.returnObject = function(object){
-    		this.end(JSON.stringify(object));
+    		this.end(JSON.stringify(object,null,4));
 		};
 		route[req.method].json(req,res);
 		return true;
