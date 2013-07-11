@@ -385,6 +385,11 @@ Ys.run_debug_parent = function(options){
     });
  };
 //--------------------------------------------------
+Ys.uncaughtException = function (err) {
+    var str = err.stack;
+    console.log(str);
+}
+//--------------------------------------------------
 Ys.run = function(options){
 
     var default_options = {
@@ -437,11 +442,7 @@ Ys.run = function(options){
 
     //correction for some types
     //mime_types["mp3"] = "audio/mp3";
-    process.on('uncaughtException', function (err) {
-            var str = err.stack;
-            console.log(str);
-            //res.end(str);
-    }); 
+    process.on('uncaughtException',Ys.uncaughtException); 
 
 
     var server = router.server = http.createServer(function (req, res) {
@@ -472,7 +473,7 @@ Ys.run = function(options){
 //--------------------------------------------------
 Ys.stop = function(options){
     console.log("shutting down ...");
-
+    process.removeListener('uncaughtException',Ys.uncaughtException);
 	var router = this;
 	if(router === Ys) router = Ys.router;
 
