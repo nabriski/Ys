@@ -247,7 +247,7 @@ Router.prototype.handlers = [
 		
 		res.setHeader('Content-Type', 'application/json');
 		res.returnObject = function(object){
-    		this.end(JSON.stringify(object));
+    		this.end(JSON.stringify(object,null,4));
 		};
 		route[req.method].json(req,res);
 		return true;
@@ -343,7 +343,7 @@ var Ys = exports.Ys = function(url_regexp) {
     
 
 	return matched[0] || (function(){
-		var route = {"regexp":url_regexp,"get":{},"post":{}};
+		var route = {"regexp":url_regexp,"get":{},"post":{},"delete":{}};
     	this.routes.push(route);
     	return route;
 	}).call(router);
@@ -392,7 +392,8 @@ Ys.run = function(options){
         port:8780,
         template_engine : "handlebars",    
         partials : {"path":".","ext":"mustache"},
-        onInit : null
+        onInit : null,
+        pidFile : null
     }
 
 	if(!options)
@@ -405,6 +406,7 @@ Ys.run = function(options){
     Object.keys(default_options.partials).forEach(function(opt){
         if(typeof(options.partials[opt])==="undefined") options.partials[opt] = default_options.partials[opt];
     });
+
 
     if(options.debug && !process.env.is_child && !Ys.is_in_debug){
         Ys.is_in_debug = true;//so other instances in the same process don't get funny
@@ -457,6 +459,7 @@ Ys.run = function(options){
     
     server.once("listening",function(){
         if(options.user) process.setuid(options.user);        
+        if(options.pidFile) fs.writeFileSync(options.pidFile,String(process.pid));      
         if(options.onInit) options.onInit();
         //process.setgid(user);        
     });        

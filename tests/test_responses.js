@@ -72,6 +72,11 @@ module.exports = {
 		Ys("^(.*/[^\./]+)$").redirect = "$1/";//add trailing slash when needed
         
         Ys("^/(Ugly)(Bad)(Good)Again/$").redirect = "/$3$2$1/";
+
+        Ys("^/delete-it/(\\d+)/$").delete = function(req,res){
+            res.writeHead(204, {'Content-Type': 'text/plain'});
+            res.end();
+        };
                
         Ys.run({partials:{
             path:"/tmp"
@@ -249,6 +254,15 @@ module.exports = {
          })
          
     },
+    test_delete: function (test) {
+
+        request({url:'http://localhost:8780/delete-it/14/',method:"DELETE"}, function (error, res, body) {
+            test.equals(res.statusCode,204);
+            test.done();
+         })
+         
+    },
+
 	test_cleanup: function (test) {
         // clean up
         Ys.stop();
