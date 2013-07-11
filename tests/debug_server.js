@@ -4,4 +4,6 @@ Ys("^/$").get.html = function(req,res){
     res.end("Hello");
 };
 
-Ys.run({debug:true,port:8780});
+Ys.run({debug:true,port:8780,onInit:function(){
+    console.log("started!");
+}});
