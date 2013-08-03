@@ -340,7 +340,6 @@ var Ys = exports.Ys = function(url_regexp) {
         return route["regexp"] === url_regexp;
 	});
 
-    
 
 	return matched[0] || (function(){
 		var route = {"regexp":url_regexp,"get":{},"post":{},"delete":{}};
