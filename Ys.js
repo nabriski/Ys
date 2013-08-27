@@ -451,7 +451,8 @@ Ys.run = function(options){
         catch(e){
             var str = e.stack;
             console.log(str);
-            res.end(str);
+            if(!res.getHeader('content-type') || res.getHeader('content-type').indexOf("text/html") >= 0) res.end(["<pre><code>",str,"</code></pre>"].join(""));
+            else res.end(str);
         }
 
     });

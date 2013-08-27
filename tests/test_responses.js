@@ -9,7 +9,6 @@ module.exports = {
             res.end("Hello World!");
         }
 
-
         Ys("^/(Good)(Bad)(Ugly)/$").get = function(req,res){
             res.end("The "+req.$1+" the "+req.$2+" and the "+req.$3+".");
         }
@@ -37,8 +36,11 @@ module.exports = {
 
         Ys("^/json/$").get.json = function(req,res){
             res.returnObject({"message" : "Hello World"});
-        } 
+        }; 
 
+        Ys("^/error/$").get.html = function(req,res){
+            a.b = 5;
+        };
 
 		fs.writeFileSync("/tmp/tmpl.html","<h1>Hello {{name}}!</h1>");
         Ys("^/html_template/$").get.template = {"/tmp/tmpl.html":function(req,res){
@@ -262,6 +264,17 @@ module.exports = {
          })
          
     },
+
+    test_error: function (test) {
+        request('http://localhost:8780/error/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"text/html");
+            test.equals(body.indexOf("<pre><code>"),0);
+            test.done();
+         });
+         
+    },
+
 
 	test_cleanup: function (test) {
         // clean up
