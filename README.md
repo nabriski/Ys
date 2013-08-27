@@ -49,7 +49,7 @@ Ys("^/$").get = function(req,res){
 #### JSON Response
 ```javascript
 Ys("^/json$").get.json = function(req,res){
-    res.returnObject({"message" : "Hello World"};);
+    res.returnObject({"message" : "Hello World"});
 };
 ```
 
