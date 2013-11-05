@@ -38,6 +38,10 @@ module.exports = {
             res.returnObject({"message" : "Hello World"});
         }; 
 
+        Ys("^/json_encoding/$").get.json = function(req,res){
+            res.returnObject({"a" : "\xE3"});
+        };
+
         Ys("^/error/$").get.html = function(req,res){
             a.b = 5;
         };
@@ -153,8 +157,18 @@ module.exports = {
             test.equals(JSON.parse(body)["message"],"Hello World");
             test.done();
          })
-         
     },
+    
+    test_json_encoding: function (test) {
+
+        request('http://localhost:8780/json_encoding/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['content-type'],"application/json");
+            test.equals(JSON.parse(body)["a"],"\xE3");
+            test.done();
+         })
+    },
+
 	test_redirect: function (test) {
 
         request('http://localhost:8780/json', function (error, res, body) {
