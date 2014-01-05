@@ -83,7 +83,16 @@ module.exports = {
             res.writeHead(204, {'Content-Type': 'text/plain'});
             res.end();
         };
-               
+
+        Ys("^/.*$").options = function(req,res){
+
+            res.writeHead(200, {
+                'Content-Length':'0',
+                'Access-Control-Allow-Origin':'http://m.example.co.il'
+            });
+            res.end();
+        };
+      
         Ys.run({partials:{
             path:"/tmp"
         }});
@@ -284,6 +293,16 @@ module.exports = {
             test.equals(res.statusCode,200);
             test.equals(res.headers['content-type'],"text/html");
             test.equals(body.indexOf("<pre><code>"),0);
+            test.done();
+         });
+         
+    },
+
+    test_options: function (test) {
+        request({url:'http://localhost:8780/UglyBadGood/',method:"OPTIONS"}, function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(res.headers['Content-Length'.toLowerCase()],"0");
+            test.equals(res.headers['Access-Control-Allow-Origin'.toLowerCase()],"http://m.example.co.il");
             test.done();
          });
          
