@@ -353,41 +353,33 @@ exports.client = require('./client');
 //--------------------------------------------------
 Ys.run_debug_parent = function(options){
 
-    var dir = path.dirname(module.parent.filename);
-    var module_file = module.parent.filename;
-    var prev_stat = fs.statSync(module_file); 
-    var child = null;
+   var forever = require('forever-monitor'),
+       moduleFile = module.parent.filename;
+       dir = path.dirname(module.parent.filename);
 
-	var fork_child = function () {
-		child = fork(module_file,[],{env:{is_child:true}});
-		child.on('exit',fork_child);
-	};
+   var child = new (forever.Monitor)(moduleFile, {
+                    max: 10,
+                    silent:false,
+                    watchDirectory : dir,
+                    options: ["debug_child"]
+                  });
 
-    fork_child();
-    process.on("SIGTERM",function(){
-        child.removeListener('exit', fork_child);
-        child.kill();
-        process.exit();
-    });
+  child.on('exit', function () {
+    console.log('your-filename.js has exited after 3 restarts');
+  });
 
-    var tid = null;
-    fs.watch(dir, function(event,filename){
-        clearTimeout(tid);
-        tid = setTimeout(function(){
-            stat = fs.statSync(module_file);
-            if(stat.mtime.getTime() > prev_stat.mtime.getTime()){
-                console.log("restarting server...");
-                prev_stat = stat;
-                child.kill();
-            }
-        }, 1000);
-    });
+  child.on('restart', function () {
+    console.log('restared!');
+  });
+
+  child.start(); 
+
  };
 //--------------------------------------------------
 Ys.uncaughtException = function (err) {
     var str = err.stack;
     console.log(str);
-}
+};
 //--------------------------------------------------
 Ys.run = function(options){
 
@@ -398,10 +390,9 @@ Ys.run = function(options){
         partials : {"path":".","ext":"mustache"},
         onInit : null,
         pidFile : null
-    }
+    };
 
-	if(!options)
-	    options = {};
+	if(!options) options = {};
 
     Object.keys(default_options).forEach(function(opt){
         if(typeof(options[opt])==="undefined") options[opt] = default_options[opt];
@@ -412,10 +403,8 @@ Ys.run = function(options){
     });
 
 
-    if(options.debug && !process.env.is_child && !Ys.is_in_debug){
-        Ys.is_in_debug = true;//so other instances in the same process don't get funny
+    if(options.debug && process.argv.indexOf("debug_child") < 0){
         Ys.run_debug_parent(options);
-
         return;
     }
 
@@ -431,9 +420,9 @@ Ys.run = function(options){
         router.readPartials();
     }
 
-    var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n')
+    var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n');
     for(var i=0; i<mimes_raw.length; i++){
-        var next = mimes_raw[i].split(/\s+/g)
+        var next = mimes_raw[i].split(/\s+/g);
         if(next && next.length >= 2)
             for(var j=1; j < next.length; j++)    
                 router.mime_types[next[j]] = next[0];
@@ -469,7 +458,7 @@ Ys.run = function(options){
     server.listen(options.port,options.host);
 
     console.log('Server running at '+options.host+':'+options.port+'/');
-}
+};
 //--------------------------------------------------
 Ys.stop = function(options){
     console.log("shutting down ...");
@@ -479,7 +468,7 @@ Ys.stop = function(options){
 
     if(options && typeof(options.onShutdown) === "function") router.server.close(options.onShutdown);
     else router.server.close();
-}
+};
 //--------------------------------------------------
 Ys.instance = function(){
 	
@@ -490,6 +479,6 @@ Ys.instance = function(){
 	inst.stop = Ys.stop.bind(router);
 
 	return inst;
-}
+};
 //--------------------------------------------------
 

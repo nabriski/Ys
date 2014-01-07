@@ -9,6 +9,7 @@
     "url": "https://github.com/nabriski/Ys.git"
   },
   "dependencies": {
-    "handlebars": ">= 1.0.0"
+    "handlebars": ">= 1.0.0",
+    "forever-monitor" : ">= 1.2.3"
   }
 }
