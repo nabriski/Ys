@@ -358,7 +358,7 @@ Ys.run_debug_parent = function(options){
        dir = path.dirname(module.parent.filename);
 
    var child = new (forever.Monitor)(moduleFile, {
-                    max: 10,
+                    max: 0,
                     silent:false,
                     watchDirectory : dir,
                     options: ["debug_child"]
