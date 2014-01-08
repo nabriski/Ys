@@ -360,17 +360,18 @@ Ys.run_debug_parent = function(options){
    var child = new (forever.Monitor)(moduleFile, {
                     max: 0,
                     silent:false,
+                    watch : true,
                     watchDirectory : dir,
                     options: ["debug_child"]
                   });
 
-  child.on('exit', function () {
-    console.log('your-filename.js has exited after 3 restarts');
+ /* child.on('stdout', function (data) {
+      console.log(""+data);
   });
 
   child.on('restart', function () {
-    console.log('restared!');
-  });
+    console.log('child restarted.');
+  });*/
 
   child.start(); 
 
