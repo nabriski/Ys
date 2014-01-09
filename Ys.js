@@ -362,6 +362,7 @@ Ys.run_debug_parent = function(options){
                     silent:false,
                     watch : true,
                     watchDirectory : dir,
+                    watchIgnorePatterns: ["*.log","*.out"],
                     options: ["debug_child"]
                   });
 
