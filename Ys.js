@@ -326,7 +326,7 @@ Router.prototype.handle_request = function(req,res){
         res.writeHead(404, {'Content-Type': 'text/html'});
         res.end(req.pathname +" >> No mapping for this path");
     }
-}
+};
 //--------------------------------------------------
 var Ys = exports.Ys = function(url_regexp) {
 	
@@ -347,7 +347,7 @@ var Ys = exports.Ys = function(url_regexp) {
     	return route;
 	}).call(router);
 
-}
+};
 //--------------------------------------------------
 exports.client = require('./client');
 //--------------------------------------------------
@@ -391,6 +391,7 @@ Ys.run = function(options){
         port:8780,
         template_engine : "handlebars",    
         partials : {"path":".","ext":"mustache"},
+        exceptionHandler : null,
         onInit : null,
         pidFile : null
     };
@@ -442,9 +443,10 @@ Ys.run = function(options){
         }
         catch(e){
             var str = e.stack;
-            console.log(str);
             if(!res.getHeader('content-type') || res.getHeader('content-type').indexOf("text/html") >= 0) res.end(["<pre><code>",str,"</code></pre>"].join(""));
             else res.end(str);
+            if(options.exceptionHandler) options.exceptionHandler(e);
+            else throw e;
         }
 
     });
