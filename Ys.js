@@ -434,7 +434,7 @@ Ys.run = function(options){
 
     //correction for some types
     //mime_types["mp3"] = "audio/mp3";
-    process.on('uncaughtException',Ys.uncaughtException); 
+    process.on('uncaughtException',options.exceptionHandler || Ys.uncaughtException); 
 
 
     var server = router.server = http.createServer(function (req, res) {
@@ -445,8 +445,7 @@ Ys.run = function(options){
             var str = e.stack;
             if(!res.getHeader('content-type') || res.getHeader('content-type').indexOf("text/html") >= 0) res.end(["<pre><code>",str,"</code></pre>"].join(""));
             else res.end(str);
-            if(options.exceptionHandler) options.exceptionHandler(e);
-            else throw e;
+            throw e;
         }
 
     });

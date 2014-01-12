@@ -63,6 +63,7 @@ module.exports = {
                 onInit : function(){
                     request.get("http://localhost:8780/").end(function(err,res){
                         ys.stop({onShutdown : function(){
+                            test.expect(1);
                             test.done();    
                         }});
                     });

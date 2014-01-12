@@ -35,7 +35,7 @@ Ys.run({
     debug:false,//default, if set to true server will restart if file including Ys has changed
     onInit:null, //default, optional callback to be called when Ys starts listening to requests
     pidFile:null, //default, optional file where pid of process is written,
-    exceptionHandler : null //default, set a function to handle uncaught exceptions in handlers
+    exceptionHandler : null //default, set a function to handle uncaught exceptions
 });
 ```
 
