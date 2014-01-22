@@ -357,13 +357,15 @@ Ys.run_debug_parent = function(options){
        moduleFile = module.parent.filename;
        dir = path.dirname(module.parent.filename);
 
+   var watchIgnorePatterns = ["*.log","*.out","pid"];
+   if(options.debugIgnore) watchIgnorePatterns = watchIgnorePatterns.concat(options.debugIgnore);
    var child = new (forever.Monitor)(moduleFile, {
                     max: 0,
                     silent:false,
                     watch : true,
                     watchDirectory : dir,
                     watchIgnoreDotFiles : true,
-                    watchIgnorePatterns: ["*.log","*.out","pid"],
+                    watchIgnorePatterns: watchIgnorePatterns,
                     options: ["debug_child"]
                   });
 
