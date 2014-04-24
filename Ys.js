@@ -166,6 +166,7 @@ Router.prototype.handlers = [
         req_parsed.protocol = proxy_parsed.protocol;
         req_parsed.hostname = proxy_parsed.hostname;
         req_parsed.port = proxy_parsed.port;
+        req_parsed.headers = req.headers;
 
         var proxy_req = http.request(req_parsed, function(backend_res) {
             res.writeHead(backend_res.statusCode,backend_res.headers);
