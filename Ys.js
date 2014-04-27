@@ -161,12 +161,15 @@ Router.prototype.handlers = [
     function proxy(route,req,res){
 		if(typeof(route.proxy) != "string") return false;
 
-        var req_parsed= url.parse(req.url);
-        var proxy_parsed = url.parse(route.proxy);
+        var req_parsed = url.parse(req.url),
+            proxy_parsed = url.parse(route.proxy);
+
         req_parsed.protocol = proxy_parsed.protocol;
+        req_parsed.host = proxy_parsed.host;
         req_parsed.hostname = proxy_parsed.hostname;
         req_parsed.port = proxy_parsed.port;
         req_parsed.headers = req.headers;
+        req_parsed.headers.host = req_parsed.host;
 
         var proxy_req = http.request(req_parsed, function(backend_res) {
             res.writeHead(backend_res.statusCode,backend_res.headers);
