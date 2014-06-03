@@ -1,5 +1,5 @@
 var fs = require('fs'),
-    request = require('request');
+    request = require('request'),
 	Ys = require('../../Ys').Ys;
 
         
@@ -12,8 +12,19 @@ module.exports = {
 
         backend("^/stuff/$").get = function(req,res){
             res.end("Backend Response");
-        }
-        
+        };
+
+        backend("^/post-stuff/$").post = function(req,res){
+
+            var body = "";
+            req.on('data', function (data) {
+                    body += data;
+            });
+
+            req.on('end', function () {
+                res.end("Backend Post Response: "+body);
+            });
+        };
                
         frontend.run({
                 onInit:function(){
@@ -34,10 +45,26 @@ module.exports = {
             test.equals(res.statusCode,200);
             test.equals(body,"Backend Response");
             test.done();
-         })
+         });
          
     },
   
+    test_get_proxied_post: function (test) {
+
+        request(
+                {
+                    url:'http://localhost:8780/post-stuff/',
+                    method:'post',
+                    body : "koko"
+                }, 
+                function (error, res, body) {
+                    test.equals(res.statusCode,200);
+                    test.equals(body,"Backend Post Response: koko");
+                    test.done();
+         });
+         
+    },
+
     test_cleanup: function (test) {
         // clean up
         frontend.stop({onShutdown:function(){

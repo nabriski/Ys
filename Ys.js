@@ -170,6 +170,7 @@ Router.prototype.handlers = [
         req_parsed.port = proxy_parsed.port;
         req_parsed.headers = req.headers;
         req_parsed.headers.host = req_parsed.host;
+        req_parsed.method = req.method;
 
         var proxy_req = http.request(req_parsed, function(backend_res) {
             res.writeHead(backend_res.statusCode,backend_res.headers);
@@ -182,7 +183,20 @@ Router.prototype.handlers = [
             });
         });
 
-        proxy_req.end();
+        if(req.method.toLowerCase() !== "post"){
+            proxy_req.end();
+        }
+        else{
+            var body = "";
+            req.on('data', function (data) {
+                    body += data;
+            });
+
+            req.on('end', function () {
+                proxy_req.write(body);
+                proxy_req.end();
+            }); 
+        }
         return true;
         
     },
