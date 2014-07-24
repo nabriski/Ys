@@ -3,7 +3,7 @@
   "main" : "./Ys.js",
   "author": "Itamar Nabriski <itamar.nabriski@gmail.com>",
   "license": "MIT",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/nabriski/Ys.git"
