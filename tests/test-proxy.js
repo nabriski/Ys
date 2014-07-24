@@ -14,6 +14,8 @@ module.exports = {
             res.end("Backend Response");
         };
 
+        backend("^/redirect/$").redirect = "/stuff/";
+
         backend("^/post-stuff/$").post = function(req,res){
 
             var body = "";
@@ -49,6 +51,15 @@ module.exports = {
          
     },
   
+    test_backend_redirect: function (test) {
+
+        request('http://localhost:8780/redirect/', function (error, res, body) {
+            test.equals(res.statusCode,200);
+            test.equals(body,"Backend Response");
+            test.done();
+         });
+         
+    },
     test_get_proxied_post: function (test) {
 
         request(

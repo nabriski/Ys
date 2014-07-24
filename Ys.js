@@ -183,19 +183,11 @@ Router.prototype.handlers = [
             });
         });
 
-        if(req.method.toLowerCase() !== "post"){
-            proxy_req.end();
+        if(req.method.toLowerCase() === "post"){
+            req.pipe(proxy_req);
         }
         else{
-            var body = "";
-            req.on('data', function (data) {
-                    body += data;
-            });
-
-            req.on('end', function () {
-                proxy_req.write(body);
-                proxy_req.end();
-            }); 
+            proxy_req.end();
         }
         return true;
         
