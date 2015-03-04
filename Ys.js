@@ -183,7 +183,7 @@ Router.prototype.handlers = [
             });
         });
 
-        if(req.method.toLowerCase() === "post"){
+        if(req.method.toLowerCase() === "post" || req.method.toLowerCase() === "put"){
             req.pipe(proxy_req);
         }
         else{

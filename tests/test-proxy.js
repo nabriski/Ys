@@ -27,6 +27,19 @@ module.exports = {
                 res.end("Backend Post Response: "+body);
             });
         };
+
+        backend("^/put-stuff/$").put = function(req,res){
+
+            var body = "";
+            req.on('data', function (data) {
+                    body += data;
+            });
+
+            req.on('end', function () {
+                res.end("Backend Post Response: "+body);
+            });
+        };
+
                
         frontend.run({
                 onInit:function(){
@@ -76,6 +89,23 @@ module.exports = {
          
     },
 
+    test_get_proxied_put: function (test) {
+
+        request(
+                {
+                    url:'http://localhost:8780/put-stuff/',
+                    method:'put',
+                    body : "koko"
+                }, 
+                function (error, res, body) {
+                    test.equals(res.statusCode,200);
+                    test.equals(body,"Backend Post Response: koko");
+                    test.done();
+         });
+         
+    },
+
+
     test_cleanup: function (test) {
         // clean up
         frontend.stop({onShutdown:function(){
@@ -83,6 +113,6 @@ module.exports = {
                 test.done();
             }});
         }});
-    },
+    }
     
 };
