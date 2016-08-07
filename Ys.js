@@ -436,7 +436,8 @@ Ys.run = function(options){
         router.readPartials();
     }
 
-    var mimes_raw  = fs.readFileSync('/etc/mime.types','utf-8').split('\n');
+    var mimeTypesPath = options.mimeTypesPath || '/etc/mime.types';
+    var mimes_raw  = fs.readFileSync(mimeTypesPath,'utf-8').split('\n');
     for(var i=0; i<mimes_raw.length; i++){
         var next = mimes_raw[i].split(/\s+/g);
         if(next && next.length >= 2)
